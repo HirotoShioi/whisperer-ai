@@ -24,7 +24,7 @@ export default function Dropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <h1 className="text-2xl">Safe Talk</h1>
+        <h1 className="text-2xl">Whisperer</h1>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <HeaderMenuItem href="/">Chat</HeaderMenuItem>

@@ -1,6 +1,6 @@
-# SafeTalk
+# Whisperer
 
-SafeTalk is a privacy-focused, browser-based AI chat application. All message history is stored locally, ensuring that no data is sent to external servers. Utilizing pglite with pgvector, SafeTalk enhances AI interactions and enables seamless conversations with PDF documents.
+Whisperer is a privacy-focused, browser-based AI chat application. All message history is stored locally, ensuring that no data is sent to external servers. Utilizing pglite with pgvector, Whisperer enhances AI interactions and enables seamless conversations with PDF documents.
 
 ![demo](https://github.com/user-attachments/assets/539b4887-66a1-4952-bd1b-d35f51f8b118)
 
@@ -14,7 +14,7 @@ SafeTalk is a privacy-focused, browser-based AI chat application. All message hi
 
 ## How does it work?
 
-SafeTalk utilizes the `pglite` library to store all data locally in IndexedDB. This approach ensures that no data ever leaves the user's device, maintaining privacy and security. Additionally, `pglite` supports the `pgvector` extension, allowing SafeTalk to implement Retrieval-Augmented Generation (RAG) by leveraging embeddings for more accurate and context-aware AI interactions.
+Whisperer utilizes the `pglite` library to store all data locally in IndexedDB. This approach ensures that no data ever leaves the user's device, maintaining privacy and security. Additionally, `pglite` supports the `pgvector` extension, allowing Whisperer to implement Retrieval-Augmented Generation (RAG) by leveraging embeddings for more accurate and context-aware AI interactions.
 
 ## Tech Stack
 
@@ -29,8 +29,8 @@ SafeTalk utilizes the `pglite` library to store all data locally in IndexedDB. T
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/HirotoShioi/safetalk.git
-    cd safetalk
+    git clone https://github.com/HirotoShioi/Whisperer.git
+    cd Whisperer
     ```
 
 2. Install the required packages:
