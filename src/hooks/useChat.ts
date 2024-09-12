@@ -7,7 +7,7 @@ import { z } from "zod";
 import { findRelevantContent } from "@/lib/ai/embeddings";
 
 export function useChat(threadId: string, initialMessages?: Message[]) {
-  return c({
+  const chat = c({
     id: threadId,
     initialMessages,
     api: "/api/chat",
@@ -26,6 +26,18 @@ export function useChat(threadId: string, initialMessages?: Message[]) {
       console.log("Tool call", toolCall);
     },
   });
+  return {
+    ...chat,
+    append: async (message: Message) => {
+      await saveMessage({
+        threadId: threadId,
+        role: message.role,
+        content: message.content,
+        toolInvocations: JSON.stringify(message.toolInvocations),
+      });
+      chat.append(message);
+    },
+  };
 }
 
 async function handleChat(req: Request) {

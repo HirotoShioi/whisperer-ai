@@ -6,10 +6,10 @@ import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   redirect,
-  useFetcher,
   useLoaderData,
   useNavigate,
   useParams,
+  useRevalidator,
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -38,24 +38,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   switch (request.method) {
     case "POST":
-      {
-        const threadId = formData.get("threadId");
-        if (typeof threadId !== "string") {
-          return null;
-        }
-        const files = formData.getAll("files");
-        for (const file of files) {
-          if (file instanceof Blob) {
-            const content = await parseFile(file, file.type);
-            await createResource({
-              threadId,
-              content,
-              title: file.name,
-              fileType: file.type,
-            });
-          }
-        }
-      }
       return Response.json({ success: true });
     case "DELETE": {
       const resourceId = formData.get("resourceId");
@@ -86,8 +68,8 @@ export type PanelState = "closed" | "list" | "detail";
 // メインのChatPageコンポーネント
 export default function ChatPage() {
   const { threadId } = useParams();
+  const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
-  const fetcher = useFetcher();
   const navigate = useNavigate();
 
   const { messages: initialMessages, resources } = useLoaderData() as {
@@ -124,7 +106,6 @@ export default function ChatPage() {
     const message = loadFromLocalStorage(threadId!);
     if (message && initialMessages.length <= 0) {
       const parsedMessage = JSON.parse(message);
-      saveMessage(parsedMessage);
       chatHook.append(parsedMessage);
       deleteFromLocalStorage(threadId!);
     }
@@ -156,52 +137,48 @@ export default function ChatPage() {
         });
         return;
       }
-      const formData = new FormData();
-      formData.append("threadId", threadId!);
-
-      for (const file of acceptedFiles) {
-        const blob = new Blob([await file.arrayBuffer()], { type: file.type });
-        formData.append("files", blob, file.name);
-      }
-      const file = acceptedFiles[0];
-      const text = await file.text();
+      const fileWithText = await Promise.all(
+        acceptedFiles.map(async (file) => {
+          const content = await parseFile(file, file.type);
+          await createResource({
+            threadId: threadId!,
+            content,
+            title: file.name,
+            fileType: file.type,
+          });
+          return {
+            text: content,
+            file,
+          };
+        })
+      );
       const message: Message = {
         id: nanoid(),
         role: "assistant" as const,
         content: "",
-        toolInvocations: [
-          {
-            state: "result" as const,
-            toolCallId: nanoid(),
-            toolName: "addResource",
-            args: {},
-            result: {
-              success: true,
-              fileId: nanoid(),
-              file: {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-              },
-              preview: text.slice(0, 300).trim(),
+        toolInvocations: fileWithText.map(({ text, file }) => ({
+          state: "result" as const,
+          toolCallId: nanoid(),
+          toolName: "addResource",
+          args: {},
+          result: {
+            success: true,
+            fileId: nanoid(),
+            file: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
             },
+            preview: text.slice(0, 300).trim(),
           },
-        ],
+        })),
       };
       chatHook.append(message);
-      saveMessage({
-        threadId: threadId!,
-        ...message,
-        toolInvocations: JSON.stringify(message.toolInvocations),
-      });
-      fetcher.submit(formData, {
-        method: "POST",
-        encType: "multipart/form-data",
-      });
       setIsDragging(false);
       setPanelState("list");
+      revalidate();
     },
-    [threadId, fetcher, openAlert, chatHook]
+    [chatHook, revalidate, openAlert, threadId]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
