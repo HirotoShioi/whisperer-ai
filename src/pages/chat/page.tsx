@@ -183,7 +183,7 @@ export default function ChatPage() {
                 size: file.size,
                 type: file.type,
               },
-              preview: text,
+              preview: text.slice(0, 300).trim(),
             },
           },
         ],
