@@ -60,7 +60,7 @@ function ResourceList({
       <div className="flex flex-col items-center justify-center p-4">
         <FileIcon className="w-10 h-10 text-gray-500" />
         <p className="text-gray-500 text-sm text-center mt-2">
-          チャットにファイルをドラッグ＆ドロップしてリソースに追加してください。
+          Drag and drop files into the chat to add them as resources.
         </p>
       </div>
     );
@@ -100,7 +100,7 @@ function ResourceHeader({
     return (
       <div className="flex justify-between items-center px-4 pt-4">
         <div className="flex-1 flex items-center">
-          <h2 className="text-lg font-semibold">コンテンツ</h2>
+          <h2 className="text-lg font-semibold">Contents</h2>
         </div>
         <XIcon className="h-6 w-6" onClick={onClose} />
       </div>

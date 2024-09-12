@@ -139,6 +139,7 @@ export default function ChatPage() {
 
   const uploadFiles = useCallback(
     async (acceptedFiles: File[]) => {
+      console.log(acceptedFiles);
       if (acceptedFiles.length <= 0) {
         setIsDragging(false);
         return;
@@ -164,12 +165,13 @@ export default function ChatPage() {
       }
       const file = acceptedFiles[0];
       const text = await file.text();
-      chatHook.append({
-        role: "assistant",
+      const message: Message = {
+        id: nanoid(),
+        role: "assistant" as const,
         content: "",
         toolInvocations: [
           {
-            state: "result",
+            state: "result" as const,
             toolCallId: nanoid(),
             toolName: "addResource",
             args: {},
@@ -185,8 +187,13 @@ export default function ChatPage() {
             },
           },
         ],
+      };
+      chatHook.append(message);
+      saveMessage({
+        threadId: threadId!,
+        ...message,
+        toolInvocations: JSON.stringify(message.toolInvocations),
       });
-
       fetcher.submit(formData, {
         method: "POST",
         encType: "multipart/form-data",

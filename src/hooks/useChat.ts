@@ -11,7 +11,7 @@ export function useChat(threadId: string, initialMessages?: Message[]) {
     id: threadId,
     initialMessages,
     api: "/api/chat",
-    maxToolRoundtrips: 10,
+    maxToolRoundtrips: 3,
     keepLastMessageOnError: true,
     fetch: (_input, init) => handleChat(new Request(`/chat/${threadId}`, init)),
     onFinish: async (message) => {
@@ -43,7 +43,10 @@ async function handleChat(req: Request) {
     model: createOpenAI({
       apiKey: apiKey,
     }).chat("gpt-4o-mini"),
-    system: systemPrompt,
+    system: `You are a helpful assistant that can answer questions and help with tasks. You have access to a knowledge base that you can use to find relevant information. You can use the tools below to help you with your tasks.
+      First, introduce yourself as a helpful assistant.
+      Then, answer the user's question.
+    `,
     messages: convertToCoreMessages(messages),
     tools: {
       getRelavantInformation: getRelavantInformationTool(threadId),
@@ -52,8 +55,6 @@ async function handleChat(req: Request) {
   });
   return result.toDataStreamResponse();
 }
-
-export const systemPrompt = `You are a helpful assistant that can answer questions and help with tasks. You have access to a knowledge base that you can use to find relevant information. You can also add new resources to the knowledge base. You can use the tools below to help you with your tasks.`;
 
 function getRelavantInformationTool(threadId: string) {
   return tool({
@@ -95,3 +96,5 @@ function addResourceTool(threadId: string) {
     },
   });
 }
+
+export type ToolNames = "getRelavantInformation" | "addResource";

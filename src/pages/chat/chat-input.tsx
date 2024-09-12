@@ -9,10 +9,9 @@ type ChatInputProps = {
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
-  onFileUpload: (file: File) => void; // 新しいプロパティ
+  onFileUpload: (file: File) => void;
 };
 
-// 新しいコンポーネント：チャット入力
 export function ChatInput({
   onSubmit,
   isLoading,
@@ -48,10 +47,11 @@ export function ChatInput({
     handleInputChange(e);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileUpload = () => {
+    const file = fileInputRef.current?.files?.[0];
     if (file) {
       onFileUpload(file);
+      fileInputRef.current.value = "";
     }
   };
 
@@ -71,7 +71,7 @@ export function ChatInput({
             size="icon"
           >
             <FileIcon className="h-4 w-4" />
-            <span className="sr-only">ファイルをアップロード</span>
+            <span className="sr-only">Upload a file</span>
           </Button>
         </div>
         <form
