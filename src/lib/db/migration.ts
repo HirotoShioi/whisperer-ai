@@ -41,6 +41,7 @@ const migrations = [
   `CREATE INDEX IF NOT EXISTS "embeddingIndex" ON "embeddings" USING hnsw (embedding vector_cosine_ops);`,
   `CREATE TABLE IF NOT EXISTS "threads" (
     "id" varchar(191) PRIMARY KEY NOT NULL,
+    "title" text NOT NULL,
     "created_at" timestamp DEFAULT now() NOT NULL,
     "updated_at" timestamp DEFAULT now() NOT NULL
   );`,

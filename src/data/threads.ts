@@ -6,10 +6,22 @@ import { nanoid } from "nanoid";
 export const newThreadId = () => {
   return nanoid();
 };
-export const createThread = async (newThreadId: string) => {
+export const createThread = async (
+  newThreadId: string,
+  title: string = "New Conversation"
+) => {
   const [thread] = await db
     .insert(threads)
-    .values({ id: newThreadId })
+    .values({ id: newThreadId, title: title })
+    .returning();
+  return thread;
+};
+
+export const renameThread = async (id: string, title: string) => {
+  const [thread] = await db
+    .update(threads)
+    .set({ title })
+    .where(eq(threads.id, id))
     .returning();
   return thread;
 };

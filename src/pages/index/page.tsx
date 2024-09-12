@@ -14,6 +14,7 @@ import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { applyMigrations } from "@/lib/db/migration";
 import React from "react";
+import { nameConversation } from "@/lib/ai/nameConversation";
 
 export async function loader() {
   const threads = await getThreads().catch(() => []);
@@ -28,7 +29,7 @@ function ThreadItem({ thread }: { thread: Thread }) {
     <Link to={`/chat/${thread.id}`} className="cursor-pointer">
       <Card className="hover:bg-gray-200 transition-colors duration-400">
         <CardContent className="p-4">
-          <h4 className="mb-2 truncate">{thread.id}</h4>
+          <h4 className="mb-2 truncate">{thread.title}</h4>
           <p className="text-sm text-gray-500">
             {new Date(thread.createdAt).toLocaleDateString()}
           </p>
@@ -75,7 +76,8 @@ function NewChatForm() {
       return;
     }
     if (input.current?.value === "") return;
-    await createThread(newId);
+    const threadName = await nameConversation(input.current?.value ?? "");
+    await createThread(newId, threadName);
     const message = {
       role: "user" as const,
       content: input.current?.value,
@@ -138,7 +140,7 @@ export default function IndexPage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {threads.map((thread, index) => (
                 <ThreadItem key={index} thread={thread} />
               ))}
