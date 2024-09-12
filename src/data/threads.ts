@@ -1,0 +1,33 @@
+import { db } from "@/providers/pglite";
+import { threads } from "@/lib/db/schema/thread";
+import { desc, eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+
+export const newThreadId = () => {
+  return nanoid();
+};
+export const createThread = async (newThreadId: string) => {
+  const [thread] = await db
+    .insert(threads)
+    .values({ id: newThreadId })
+    .returning();
+  return thread;
+};
+
+export const getThreadById = async (id: string) => {
+  const [thread] = await db.select().from(threads).where(eq(threads.id, id));
+  return thread;
+};
+
+export const getThreads = async () => {
+  return db.select().from(threads).orderBy(desc(threads.createdAt));
+};
+
+export const doesThreadExist = async (id: string) => {
+  const thread = await getThreadById(id);
+  return !!thread;
+};
+// deleteすると関連するmessages, resourcesも削除される
+export const deleteThread = async (id: string) => {
+  return db.delete(threads).where(eq(threads.id, id));
+};
