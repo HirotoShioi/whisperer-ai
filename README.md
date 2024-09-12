@@ -2,7 +2,7 @@
 
 Whisperer is a privacy-focused, browser-based AI chat application. All message history is stored locally, ensuring that no data is sent to external servers. Utilizing pglite with pgvector, Whisperer enhances AI interactions and enables seamless conversations with PDF documents.
 
-![demo](https://github.com/user-attachments/assets/539b4887-66a1-4952-bd1b-d35f51f8b118)
+![demo.png](https://github.com/user-attachments/assets/b3d6ac3e-82df-4c23-ad6f-bb0848b62ff8)
 
 ## Features
 
