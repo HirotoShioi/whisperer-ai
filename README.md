@@ -16,10 +16,6 @@ SafeTalk is a privacy-focused, browser-based AI chat application. All message hi
 
 SafeTalk utilizes the `pglite` library to store all data locally in IndexedDB. This approach ensures that no data ever leaves the user's device, maintaining privacy and security. Additionally, `pglite` supports the `pgvector` extension, allowing SafeTalk to implement Retrieval-Augmented Generation (RAG) by leveraging embeddings for more accurate and context-aware AI interactions.
 
-## Demo
-
-![Demo Screenshot](link-to-your-demo-screenshot)
-
 ## Tech Stack
 
 - **Frontend**: [react](https://react.dev/), [react-router](https://reactrouter.com/en/main)
