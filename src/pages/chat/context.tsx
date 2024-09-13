@@ -18,6 +18,7 @@ import { createResource } from "@/data/resources";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
 import { saveMessage } from "@/data/messages";
+import { useAutoScroll } from "@/hooks/use-auto-scroll";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -29,6 +30,8 @@ interface ChatContextType {
   uploadFiles: (acceptedFiles: File[]) => Promise<void>;
   uploadText: (text: string) => Promise<void>;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  scrollRef: (element: HTMLDivElement | null) => void;
+  scrollToEnd: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -42,7 +45,7 @@ export const ChatContextProvider: React.FC<{
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
   const navigate = useNavigate();
-
+  const { ref: scrollRef, scrollToEnd } = useAutoScroll();
   const chatHook = useChat(threadId!, initialMessages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
     if (window.innerWidth < 768) {
@@ -149,6 +152,7 @@ export const ChatContextProvider: React.FC<{
       threadId: threadId!,
     });
     chatHook.handleSubmit(e);
+    scrollToEnd();
   };
 
   return (
@@ -161,6 +165,8 @@ export const ChatContextProvider: React.FC<{
         uploadFiles,
         uploadText,
         onSubmit,
+        scrollRef,
+        scrollToEnd,
       }}
     >
       {children}

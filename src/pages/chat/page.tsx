@@ -16,7 +16,6 @@ import { ChatInput } from "./chat-input";
 import { ContentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import ChatHeader from "./header";
-import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 
@@ -55,9 +54,9 @@ const Input = React.memo(ChatInput);
 const Content = React.memo(ContentPanel);
 
 function ChatPageContent() {
-  const { chatHook, panelState, setPanelState } = useChatContext();
+  const { chatHook, panelState, setPanelState, scrollRef, scrollToEnd } =
+    useChatContext();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
-  const { ref: scrollRef, scrollToEnd } = useAutoScroll();
 
   useEffect(() => {
     scrollToEnd();

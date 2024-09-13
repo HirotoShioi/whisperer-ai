@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createThread, getThreads, newThreadId } from "@/data/threads";
-import { Await, defer, useLoaderData, useNavigate } from "react-router-dom";
+import { defer, useLoaderData, useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/db/schema/thread";
 import { Link } from "react-router-dom";
 import {
@@ -13,7 +13,7 @@ import { useRef } from "react";
 import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { applyMigrations } from "@/lib/db/migration";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { nameConversation } from "@/lib/ai/name-conversation";
 
 export async function loader() {
@@ -39,24 +39,20 @@ function ThreadItem({ thread }: { thread: Thread }) {
   );
 }
 
-function LoadingButton() {
-  return (
-    <Button
-      type="submit"
-      className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
-      disabled
-    >
-      <PenSquareIcon className="h-4 w-4" />
-      <span className="sr-only">Send</span>
-    </Button>
-  );
-}
 function NewChatForm() {
   const navigate = useNavigate();
   const { openAlert } = useAlert();
   const { migrations } = useLoaderData() as { migrations: Promise<void> };
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    migrations.then(() => {
+      setIsLoading(false);
+    });
+  }, [migrations]);
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const apiKey = loadFromLocalStorage("openAIAPIKey");
@@ -86,6 +82,7 @@ function NewChatForm() {
     saveToLocalStorage(newId, JSON.stringify(message));
     navigate(`/chat/${newId}`);
   }
+
   return (
     <div className="max-w-2xl mx-auto w-full">
       <Card>
@@ -100,17 +97,14 @@ function NewChatForm() {
                 placeholder="Type your message here..."
                 ref={input}
               />
-              <React.Suspense fallback={<LoadingButton />}>
-                <Await resolve={migrations}>
-                  <Button
-                    type="submit"
-                    className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
-                  >
-                    <PenSquareIcon className="h-4 w-4" />
-                    <span className="sr-only">Send</span>
-                  </Button>
-                </Await>
-              </React.Suspense>
+              <Button
+                type="submit"
+                className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
+                disabled={isLoading}
+              >
+                <PenSquareIcon className="h-4 w-4" />
+                <span className="sr-only">Send</span>
+              </Button>
             </form>
             <div className="text-sm text-gray-500">Model: gpt-4o-mini</div>
           </div>
