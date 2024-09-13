@@ -1,24 +1,14 @@
 import { FileIcon, PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
-import { PanelState } from "./page";
+import { useChatContext } from "@/contexts/ChatContext";
 
 type ChatInputProps = {
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  isLoading: boolean;
-  input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
   onFileUpload: (file: File) => void;
 };
 
-export function ChatInput({
-  onSubmit,
-  isLoading,
-  input,
-  handleInputChange,
-  onFileUpload,
-}: ChatInputProps) {
+export function ChatInput({ onFileUpload }: ChatInputProps) {
+  const { chatHook, onSubmit } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -34,17 +24,17 @@ export function ChatInput({
       const lines =
         charsPerLine === 0
           ? 1
-          : input.split("\n").reduce((acc, line) => {
+          : chatHook.input.split("\n").reduce((acc, line) => {
               return acc + Math.ceil(line.length / charsPerLine);
             }, 0);
       const newRows = Math.min(10, Math.max(1, lines));
       setRows(newRows);
       textareaRef.current.style.height = `${newRows * lineHeight}px`;
     }
-  }, [input, window.innerWidth]);
+  }, [chatHook.input, window.innerWidth]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    handleInputChange(e);
+    chatHook.handleInputChange(e);
   };
 
   const handleFileUpload = () => {
@@ -87,7 +77,7 @@ export function ChatInput({
             style={{ minHeight: "20px" }}
             placeholder="Enter your message..."
             onChange={handleTextareaChange}
-            disabled={isLoading}
+            disabled={chatHook.isLoading}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
             id="chat-input"
@@ -100,7 +90,7 @@ export function ChatInput({
                 document.getElementById("chat-submit")?.click();
               }
             }}
-            value={input}
+            value={chatHook.input}
             tabIndex={0}
             cols={100}
             rows={rows}
@@ -111,7 +101,7 @@ export function ChatInput({
           <Button
             type="button"
             onClick={() => document.getElementById("chat-submit")?.click()}
-            disabled={isLoading || input.length <= 0}
+            disabled={chatHook.isLoading || chatHook.input.length <= 0}
             className="rounded-full p-2 w-10 h-10"
             size="icon"
           >

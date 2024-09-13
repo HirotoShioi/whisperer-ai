@@ -5,9 +5,10 @@ import { Resource } from "@/lib/db/schema/resources";
 import { useFetcher } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { PanelState } from "./page";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Markdown } from "@/components/markdown";
+import ContentUploader from "./contentUploader";
+import { useChatContext } from "@/contexts/ChatContext";
 
 function ResourceItem({
   resource,
@@ -99,8 +100,9 @@ function ResourceHeader({
   if (!resource) {
     return (
       <div className="flex justify-between items-center px-4 pt-4">
-        <div className="flex-1 flex items-center">
+        <div className="flex gap-2 items-center">
           <h2 className="text-lg font-semibold">Contents</h2>
+          <ContentUploader />
         </div>
         <XIcon className="h-6 w-6" onClick={onClose} />
       </div>
@@ -124,21 +126,13 @@ function ResourceHeader({
   );
 }
 
-type ContentPanelProps = {
-  resources: Resource[];
-  panelState: PanelState;
-  setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
-};
-
-export function ContentPanel({
-  resources,
-  panelState,
-  setPanelState,
-}: ContentPanelProps) {
+export function ContentPanel() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { panelState, setPanelState, resources } = useChatContext();
+
   function setResource(resource: Resource) {
     setSelectedResource(resource);
     setPanelState("detail");
