@@ -8,10 +8,25 @@ const schema = z.object({
   title: z.string().describe("The title of the markdown file"),
 });
 
+const MAXIMUM_TEXT_LENGTH = 10000;
+
 export type MarkdownOutput = z.infer<typeof schema>;
+
+/**
+ * Converts text to markdown.
+ * If the text is too long, it returns the text as the content and "Document.md" as the title.
+ * @param text The text to convert to markdown.
+ * @returns The markdown content.
+ */
 export async function convertTextToMarkdown(
   text: string
 ): Promise<MarkdownOutput> {
+  if (text.length > MAXIMUM_TEXT_LENGTH) {
+    return {
+      content: text,
+      title: "Document.md",
+    };
+  }
   const apiKey = loadFromLocalStorage("openAIAPIKey");
   if (!apiKey) {
     throw new Error("OpenAI API key not found");
@@ -23,7 +38,7 @@ export async function convertTextToMarkdown(
   }).withStructuredOutput(schema);
 
   const template = PromptTemplate.fromTemplate(
-    `Please convert the following text into readable Markdown format, using appropriate headings, lists, emphasis, and other formatting. If a table is more appropriate than a list, please use a table.
+    `Please convert the following text into readable Markdown format, using appropriate headings, lists, emphasis, and other formatting. If a table is more suitable than a list, please use a table.
     Output the converted text only and nothing else.
 
     *** START OF TEXT ***

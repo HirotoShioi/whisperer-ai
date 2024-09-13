@@ -77,10 +77,20 @@ function ResourceList({
 
 function ResourceContent({ resource }: { resource: Resource }) {
   const rendered = useMemo(() => {
-    if (resource.fileType === "text") {
-      return <p className="whitespace-pre-wrap">{resource.content}</p>;
+    switch (resource.fileType) {
+      case "text/plain":
+        return <p className="whitespace-pre-wrap">{resource.content}</p>;
+      case "text/markdown":
+        return <Markdown content={resource.content} />;
+      case "application/json":
+        return (
+          <div className="bg-gray-100 p-2 rounded-md">
+            <code className="whitespace-pre-wrap">{resource.content}</code>
+          </div>
+        );
+      default:
+        return <p className="whitespace-pre-wrap">{resource.content}</p>;
     }
-    return <Markdown content={resource.content} />;
   }, [resource.content, resource.fileType]);
   return (
     <ScrollArea className="h-[calc(100vh-11rem)]">

@@ -99,12 +99,12 @@ export const ChatContextProvider: React.FC<{
       }
       const fileWithText = await Promise.all(
         acceptedFiles.map(async (file) => {
-          const content = await parseFile(file, file.type);
+          const { content, fileType } = await parseFile(file, file.type);
           await createResource({
             threadId: threadId!,
             content,
             title: file.name,
-            fileType: file.type,
+            fileType,
           });
           return {
             text: content,
