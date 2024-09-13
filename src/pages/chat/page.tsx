@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
 import { useEffect, useMemo } from "react";
-// motionのインポートを削除
 import { deleteResourceById, getResources } from "@/data/resources";
 import { Resource } from "@/lib/db/schema/resources";
 import { MessageComponent } from "./message";
@@ -53,10 +52,18 @@ const Header = React.memo(ChatHeader);
 const Input = React.memo(ChatInput);
 const Content = React.memo(ContentPanel);
 
+function ChatContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="md:max-w-3xl xl:max-w-[48rem] w-full mx-auto">
+      {children}
+    </div>
+  );
+}
+
 function ChatPageContent() {
   const { chatHook, panelState, setPanelState, scrollRef, scrollToEnd } =
     useChatContext();
-  const isSmallScreen = useMediaQuery("(max-width: 768px)");
+  const isSmallScreen = useMediaQuery("(max-width: 1430px)");
 
   useEffect(() => {
     scrollToEnd();
@@ -68,7 +75,7 @@ function ChatPageContent() {
     }
     switch (panelState) {
       case "detail":
-        return "50rem";
+        return "40rem";
       case "list":
         return "24rem";
       case "closed":
@@ -84,29 +91,35 @@ function ChatPageContent() {
     <>
       <Header toggleArchive={toggleArchive} />
       <div className="flex flex-col h-full">
-        <div className="flex-grow relative mx-auto">
+        <div className="flex-grow relative w-full">
           <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
             <div className="flex-grow overflow-y-auto" ref={scrollRef}>
               <div
+                className="mx-auto"
                 style={{
                   marginRight: animatePanelMargin,
                 }}
               >
                 {chatHook.messages.map((message) => (
-                  <MessageComponent key={message.id} message={message} />
+                  <ChatContainer key={message.id}>
+                    <MessageComponent message={message} />
+                  </ChatContainer>
                 ))}
               </div>
             </div>
           </div>
           <div
+            className="mx-auto"
             style={{
               marginRight: animatePanelMargin,
             }}
           >
-            <Input />
+            <ChatContainer>
+              <Input />
+            </ChatContainer>
           </div>
         </div>
-        <Content />
+        {!isSmallScreen && <Content />}
       </div>
     </>
   );

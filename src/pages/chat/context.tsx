@@ -135,14 +135,19 @@ export const ChatContextProvider: React.FC<{
       chatHook.append(message);
       setPanelState("list");
       revalidate();
+      scrollToEnd();
     },
-    [chatHook, revalidate, openAlert, threadId]
+    [chatHook, revalidate, openAlert, threadId, scrollToEnd]
   );
 
-  const uploadText = useCallback(async (text: string) => {
-    console.log(text);
-    // ::TEXT_UPLOAD_IMPLEMENTATION::
-  }, []);
+  const uploadText = useCallback(
+    async (text: string) => {
+      console.log(text);
+      // ::TEXT_UPLOAD_IMPLEMENTATION::
+      scrollToEnd();
+    },
+    [scrollToEnd]
+  );
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     if (chatHook.input.length <= 0) return;

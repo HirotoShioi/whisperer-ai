@@ -129,22 +129,8 @@ export function ContentPanel() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 1430px)");
   const { panelState, setPanelState, resources } = useChatContext();
-
-  function setResource(resource: Resource) {
-    setSelectedResource(resource);
-    setPanelState("detail");
-  }
-
-  const handleClose = () => {
-    if (selectedResource) {
-      setSelectedResource(null);
-      setPanelState("list");
-    } else {
-      setPanelState("closed");
-    }
-  };
 
   const panelTransform = useMemo(() => {
     if (isMobile) {
@@ -163,7 +149,7 @@ export function ContentPanel() {
   const panelWidth = isMobile
     ? "100%"
     : panelState === "detail"
-      ? "50rem"
+      ? "40rem"
       : "24rem";
 
   useEffect(() => {
@@ -171,10 +157,23 @@ export function ContentPanel() {
       setSelectedResource(null);
     }
   }, [panelState]);
-
-  if (panelState === "closed") {
+  if (isMobile || panelState === "closed") {
     return null;
   }
+
+  function setResource(resource: Resource) {
+    setSelectedResource(resource);
+    setPanelState("detail");
+  }
+
+  const handleClose = () => {
+    if (selectedResource) {
+      setSelectedResource(null);
+      setPanelState("list");
+    } else {
+      setPanelState("closed");
+    }
+  };
 
   return (
     <div
