@@ -19,6 +19,7 @@ import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
 import { saveMessage } from "@/data/messages";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
+import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -142,11 +143,14 @@ export const ChatContextProvider: React.FC<{
 
   const uploadText = useCallback(
     async (text: string) => {
-      console.log(text);
-      // ::TEXT_UPLOAD_IMPLEMENTATION::
-      scrollToEnd();
+      const markdown = await convertTextToMarkdown(text);
+      // upload markdown as a file
+      const file = new File([markdown.content], markdown.title, {
+        type: "text/markdown",
+      });
+      await uploadFiles([file]);
     },
-    [scrollToEnd]
+    [uploadFiles]
   );
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
