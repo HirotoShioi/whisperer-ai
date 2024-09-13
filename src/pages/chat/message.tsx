@@ -1,5 +1,6 @@
 import { Message as M } from "ai/react";
 import { Markdown } from "@/components/markdown";
+import { ToolNames } from "@/hooks/useChat";
 
 type ToolInvocation = {
   toolCallId: string;
@@ -9,11 +10,13 @@ type ToolInvocation = {
 
 function ToolMessage({ toolInvocation }: { toolInvocation: ToolInvocation }) {
   const message = () => {
-    switch (toolInvocation.toolName) {
+    switch (toolInvocation.toolName as ToolNames) {
       case "getRelavantInformation":
         return "Searching information relevant to the conversation... ";
       case "addResource":
         return "Embedding Contents...";
+      default:
+        return "Processing...";
     }
   };
   return (
