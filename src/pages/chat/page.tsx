@@ -11,7 +11,7 @@ import {
   useRevalidator,
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   deleteFromLocalStorage,
@@ -32,6 +32,7 @@ import ChatHeader from "./header";
 import { parseFile } from "@/lib/file";
 import { useAlert } from "@/components/alert";
 import { nanoid } from "nanoid";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -70,6 +71,11 @@ export default function ChatPage() {
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
   const navigate = useNavigate();
+  const { ref: scrollRef, scrollToEnd } = useAutoScroll();
+
+  useEffect(() => {
+    scrollToEnd();
+  }, [scrollToEnd]);
 
   const { messages: initialMessages, resources } = useLoaderData() as {
     messages: Message[];
@@ -85,8 +91,6 @@ export default function ChatPage() {
     }
     return "list";
   });
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<MutationObserver | null>(null);
 
   useEffect(() => {
     const apiKey = loadFromLocalStorage("openAIAPIKey");
@@ -211,6 +215,10 @@ export default function ChatPage() {
       threadId: threadId!,
     });
     chatHook.handleSubmit(e);
+    // Scroll to bottom after the message has rendered
+    setTimeout(() => {
+      scrollToEnd();
+    }, 0);
   };
 
   const animatePanelMargin = useMemo(() => {
@@ -231,31 +239,6 @@ export default function ChatPage() {
     panelState === "closed" ? setPanelState("list") : setPanelState("closed");
   };
 
-  useEffect(() => {
-    const chatContainer = chatContainerRef.current;
-    if (!chatContainer) return;
-
-    const scrollToBottom = () => {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    };
-
-    observerRef.current = new MutationObserver(scrollToBottom);
-
-    observerRef.current.observe(chatContainer, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    scrollToBottom();
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
-
   return (
     <>
       <ChatHeader toggleArchive={toggleArchive} />
@@ -270,10 +253,7 @@ export default function ChatPage() {
             </div>
           )}
           <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
-            <div
-              className="flex-grow overflow-y-auto scroll-smooth"
-              ref={chatContainerRef}
-            >
+            <div className="flex-grow overflow-y-auto" ref={scrollRef}>
               <motion.div
                 className="p-2 sm:p-6 flex flex-col gap-4"
                 animate={{
