@@ -3,6 +3,11 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { loadFromLocalStorage } from "@/utils/local-storage";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
+/**
+ * Names a conversation.
+ * @param message The message to name the conversation.
+ * @returns The name of the conversation.
+ */
 export async function nameConversation(message: string): Promise<string> {
   const apiKey = loadFromLocalStorage("openAIAPIKey");
   if (!apiKey) {

@@ -1,14 +1,18 @@
-import { index, pgTable, serial, text, vector } from 'drizzle-orm/pg-core';
+import { EMBEDDING_DIMENSIONS } from "@/constants";
+import { index, pgTable, serial, text, vector } from "drizzle-orm/pg-core";
 export const guides = pgTable(
-  'guides',
+  "guides",
   {
-    id: serial('id').primaryKey(),
-    title: text('title').notNull(),
-    description: text('description').notNull(),
-    url: text('url').notNull(),
-    embedding: vector('embedding', { dimensions: 1536 }),
+    id: serial("id").primaryKey(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    url: text("url").notNull(),
+    embedding: vector("embedding", { dimensions: EMBEDDING_DIMENSIONS }),
   },
   (table) => ({
-    embeddingIndex: index('embeddingIndex').using('hnsw', table.embedding.op('vector_cosine_ops')),
-  }),
+    embeddingIndex: index("embeddingIndex").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops")
+    ),
+  })
 );

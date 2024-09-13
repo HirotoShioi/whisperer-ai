@@ -20,6 +20,7 @@ import { parseFile } from "@/lib/file";
 import { saveMessage } from "@/data/messages";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
+import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -85,7 +86,9 @@ export const ChatContextProvider: React.FC<{
       if (acceptedFiles.length <= 0) {
         return;
       }
-      if (acceptedFiles.some((file) => file.size >= 5 * 1024 * 1024)) {
+      if (
+        acceptedFiles.some((file) => file.size >= MAXIMUM_FILE_SIZE_IN_BYTES)
+      ) {
         openAlert({
           title: "File size is too large",
           description: "Please upload files smaller than 5MB",
@@ -129,7 +132,7 @@ export const ChatContextProvider: React.FC<{
               size: file.size,
               type: file.type,
             },
-            preview: text.slice(0, 300).trim(),
+            preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
           },
         })),
       };

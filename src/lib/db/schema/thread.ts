@@ -2,9 +2,10 @@ import { sql } from "drizzle-orm";
 import { varchar, timestamp, pgTable } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { nanoid } from "nanoid";
+import { MAX_VARCHAR_LENGTH } from "@/constants";
 
 export const threads = pgTable("threads", {
-  id: varchar("id", { length: 191 })
+  id: varchar("id", { length: MAX_VARCHAR_LENGTH })
     .primaryKey()
     .$defaultFn(() => nanoid()),
   createdAt: timestamp("created_at")

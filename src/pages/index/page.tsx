@@ -1,7 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createThread, getThreads, newThreadId } from "@/data/threads";
+import {
+  createThread,
+  getThreads,
+  newThreadId,
+  renameThread,
+} from "@/data/threads";
 import { defer, useLoaderData, useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/db/schema/thread";
 import { Link } from "react-router-dom";
@@ -71,12 +76,14 @@ function NewChatForm() {
       });
       return;
     }
-    if (input.current?.value === "") return;
-    const threadName = await nameConversation(input.current?.value ?? "");
-    await createThread(newId, threadName);
+    const inputValue = input.current?.value ?? "";
+    if (inputValue.length <= 0) return;
+    await createThread(newId);
+    // non-blocking
+    nameConversation(inputValue).then((name) => renameThread(newId, name));
     const message = {
       role: "user" as const,
-      content: input.current?.value,
+      content: inputValue,
       threadId: newId,
     };
     saveToLocalStorage(newId, JSON.stringify(message));

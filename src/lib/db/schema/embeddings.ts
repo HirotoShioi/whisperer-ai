@@ -1,4 +1,5 @@
 import { nanoid } from "@/lib/utils";
+import { EMBEDDING_DIMENSIONS, MAX_VARCHAR_LENGTH } from "@/constants";
 import {
   index,
   pgTable,
@@ -13,16 +14,17 @@ import { sql } from "drizzle-orm";
 export const embeddings = pgTable(
   "embeddings",
   {
-    id: varchar("id", { length: 191 })
+    id: varchar("id", { length: MAX_VARCHAR_LENGTH })
       .primaryKey()
       .$defaultFn(() => nanoid()),
-    resourceId: varchar("resource_id", { length: 191 }).references(
-      () => resources.id,
-      { onDelete: "cascade" }
-    ),
-    threadId: varchar("thread_id", { length: 191 }).notNull(),
+    resourceId: varchar("resource_id", {
+      length: MAX_VARCHAR_LENGTH,
+    }).references(() => resources.id, { onDelete: "cascade" }),
+    threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH }).notNull(),
     content: text("content").notNull(),
-    embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+    embedding: vector("embedding", {
+      dimensions: EMBEDDING_DIMENSIONS,
+    }).notNull(),
     createdAt: timestamp("created_at")
       .notNull()
       .default(sql`now()`),

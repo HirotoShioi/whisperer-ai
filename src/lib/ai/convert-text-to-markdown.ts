@@ -2,13 +2,12 @@ import { ChatOpenAI } from "@langchain/openai";
 import { loadFromLocalStorage } from "@/utils/local-storage";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
+import { MAXIMUM_TEXT_LENGTH_FOR_MARKDOWN_CONVERSION } from "@/constants";
 
 const schema = z.object({
   content: z.string().describe("The text to convert to markdown"),
   title: z.string().describe("The title of the markdown file"),
 });
-
-const MAXIMUM_TEXT_LENGTH = 10000;
 
 export type MarkdownOutput = z.infer<typeof schema>;
 
@@ -21,7 +20,7 @@ export type MarkdownOutput = z.infer<typeof schema>;
 export async function convertTextToMarkdown(
   text: string
 ): Promise<MarkdownOutput> {
-  if (text.length > MAXIMUM_TEXT_LENGTH) {
+  if (text.length > MAXIMUM_TEXT_LENGTH_FOR_MARKDOWN_CONVERSION) {
     return {
       content: text,
       title: "Document.md",
