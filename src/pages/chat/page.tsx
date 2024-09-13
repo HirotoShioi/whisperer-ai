@@ -14,9 +14,9 @@ import { Resource } from "@/lib/db/schema/resources";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { ContentPanel } from "./content-panel";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import ChatHeader from "./header";
-import { useAutoScroll } from "@/hooks/useAutoScroll";
+import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 

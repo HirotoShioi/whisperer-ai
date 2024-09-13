@@ -8,7 +8,7 @@ import ChatPage, {
   action as chatAction,
 } from "./pages/chat/page";
 import SettingsPage from "./pages/settings-page";
-import IndexPage, { loader as indexLoader } from "./pages/index/page";
+import IndexPage, { loader as indexLoader } from "./pages/index/Page";
 
 const router = createBrowserRouter([
   {

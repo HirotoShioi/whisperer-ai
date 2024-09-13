@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { SmoothScroller } from "./smoothScroller";
+import { SmoothScroller } from "./smooth-scroller";
 
 export type UseAutoScrollProps = {
   enabled?: boolean;

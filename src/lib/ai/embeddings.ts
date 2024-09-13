@@ -1,6 +1,6 @@
 import { embed, embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { loadFromLocalStorage } from "@/utils/localStorageUtils";
+import { loadFromLocalStorage } from "@/utils/local-storage";
 import { embeddings } from "../db/schema/embeddings";
 import { cosineDistance, sql, gt, desc, eq, and } from "drizzle-orm";
 import { db } from "@/providers/pglite";

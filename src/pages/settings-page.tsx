@@ -8,7 +8,7 @@ import { pageWrapperStyles } from "@/styles/common";
 import {
   loadFromLocalStorage,
   saveToLocalStorage,
-} from "@/utils/localStorageUtils";
+} from "@/utils/local-storage";
 import { useState } from "react";
 import {
   AlertDialog,

@@ -4,9 +4,9 @@ import { Resource } from "@/lib/db/schema/resources";
 import { useFetcher } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Markdown } from "@/components/markdown";
-import ContentUploader from "./contentUploader";
+import ContentUploader from "./content-uploader";
 import { useChatContext } from "@/pages/chat/context";
 
 function ResourceItem({

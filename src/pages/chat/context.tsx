@@ -6,14 +6,14 @@ import React, {
   useEffect,
 } from "react";
 import { Message } from "ai/react";
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/use-chat";
 import { Resource } from "@/lib/db/schema/resources";
 import { useParams, useNavigate, useRevalidator } from "react-router-dom";
 import { useAlert } from "@/components/alert";
 import {
   loadFromLocalStorage,
   deleteFromLocalStorage,
-} from "@/utils/localStorageUtils";
+} from "@/utils/local-storage";
 import { createResource } from "@/data/resources";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";

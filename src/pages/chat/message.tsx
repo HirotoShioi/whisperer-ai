@@ -1,6 +1,6 @@
 import { Message as M } from "ai/react";
 import { Markdown } from "@/components/markdown";
-import { ToolNames } from "@/hooks/useChat";
+import { ToolNames } from "@/hooks/use-chat";
 
 type ToolInvocation = {
   toolCallId: string;

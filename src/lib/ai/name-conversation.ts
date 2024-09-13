@@ -1,6 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { loadFromLocalStorage } from "@/utils/localStorageUtils";
+import { loadFromLocalStorage } from "@/utils/local-storage";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
 export async function nameConversation(message: string): Promise<string> {

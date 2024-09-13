@@ -8,13 +8,13 @@ import { Link } from "react-router-dom";
 import {
   loadFromLocalStorage,
   saveToLocalStorage,
-} from "@/utils/localStorageUtils";
+} from "@/utils/local-storage";
 import { useRef } from "react";
 import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { applyMigrations } from "@/lib/db/migration";
 import React from "react";
-import { nameConversation } from "@/lib/ai/nameConversation";
+import { nameConversation } from "@/lib/ai/name-conversation";
 
 export async function loader() {
   const threads = await getThreads().catch(() => []);
