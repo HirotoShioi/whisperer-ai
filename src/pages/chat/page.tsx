@@ -260,7 +260,7 @@ export default function ChatPage() {
     <>
       <ChatHeader toggleArchive={toggleArchive} />
       <div className="flex flex-col h-full">
-        <div {...getRootProps()} className="flex-grow relative">
+        <div {...getRootProps()} className="flex-grow relative mx-auto">
           <input {...getInputProps()} />
           {isDragging && (
             <div className="absolute inset-0 flex items-center justify-center text-center bg-white bg-opacity-75 transition-opacity duration-200 ease-in-out z-50">
@@ -271,10 +271,11 @@ export default function ChatPage() {
           )}
           <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
             <div
-              className="flex-grow overflow-y-auto p-4 scroll-smooth"
+              className="flex-grow overflow-y-auto scroll-smooth"
               ref={chatContainerRef}
             >
               <motion.div
+                className="p-2 sm:p-6 flex flex-col gap-4"
                 animate={{
                   marginRight: animatePanelMargin,
                 }}
@@ -288,7 +289,7 @@ export default function ChatPage() {
             </div>
           </div>
           <motion.div
-            className="absolute bottom-0 left-0 right-0 p-4"
+            className=""
             animate={{
               marginRight: animatePanelMargin,
             }}

@@ -56,7 +56,7 @@ export function ChatInput({
   };
 
   return (
-    <div className="p-2 bg-muted mx-auto max-w-2xl lg:gap-1 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem] rounded-[26px] border-2 border-gray-300 shadow-md">
+    <div className="p-2 bg-muted max-w-2xl lg:gap-1 md:max-w-3xl lg:max-w-[40rem] xl:max-w-[48rem] rounded-[26px] border-2 border-gray-300 shadow-md">
       <div className="flex items-end gap-1.5 md:gap-2">
         <div className="relative">
           <input
