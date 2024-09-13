@@ -1,4 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/useChat";
 import { getMessages, saveMessage } from "@/data/messages";
@@ -12,7 +11,7 @@ import {
   useRevalidator,
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   deleteFromLocalStorage,
@@ -86,6 +85,9 @@ export default function ChatPage() {
     }
     return "list";
   });
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
+
   useEffect(() => {
     const apiKey = loadFromLocalStorage("openAIAPIKey");
     if (!apiKey) {
@@ -229,6 +231,31 @@ export default function ChatPage() {
     panelState === "closed" ? setPanelState("list") : setPanelState("closed");
   };
 
+  useEffect(() => {
+    const chatContainer = chatContainerRef.current;
+    if (!chatContainer) return;
+
+    const scrollToBottom = () => {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+
+    observerRef.current = new MutationObserver(scrollToBottom);
+
+    observerRef.current.observe(chatContainer, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    scrollToBottom();
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <>
       <ChatHeader toggleArchive={toggleArchive} />
@@ -242,19 +269,24 @@ export default function ChatPage() {
               </p>
             </div>
           )}
-          <ScrollArea className="h-[calc(100vh-150px)] pb-2 space-y-4">
-            <motion.div
-              animate={{
-                marginRight: animatePanelMargin,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              initial={false}
+          <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
+            <div
+              className="flex-grow overflow-y-auto p-4 scroll-smooth"
+              ref={chatContainerRef}
             >
-              {chatHook.messages.map((message, index) => (
-                <MessageComponent key={index} message={message} />
-              ))}
-            </motion.div>
-          </ScrollArea>
+              <motion.div
+                animate={{
+                  marginRight: animatePanelMargin,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                initial={false}
+              >
+                {chatHook.messages.map((message, index) => (
+                  <MessageComponent key={index} message={message} />
+                ))}
+              </motion.div>
+            </div>
+          </div>
           <motion.div
             className="absolute bottom-0 left-0 right-0 p-4"
             animate={{
