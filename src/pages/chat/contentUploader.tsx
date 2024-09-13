@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useChatContext } from "@/contexts/ChatContext";
+import { useChatContext } from "@/pages/chat/context";
 
 export default function ContentUploader() {
   const { uploadFiles, uploadText } = useChatContext();

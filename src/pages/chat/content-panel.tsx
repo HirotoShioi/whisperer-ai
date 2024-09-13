@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { XIcon, FileIcon, ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Resource } from "@/lib/db/schema/resources";
@@ -8,7 +7,7 @@ import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Markdown } from "@/components/markdown";
 import ContentUploader from "./contentUploader";
-import { useChatContext } from "@/contexts/ChatContext";
+import { useChatContext } from "@/pages/chat/context";
 
 function ResourceItem({
   resource,
@@ -147,52 +146,56 @@ export function ContentPanel() {
     }
   };
 
-  const panelWidth = useMemo(() => {
+  const panelTransform = useMemo(() => {
     if (isMobile) {
-      return "w-full";
+      return panelState === "closed" ? "100%" : "0%";
     }
     switch (panelState) {
       case "detail":
-        return "md:w-[50rem]";
+        return "0%";
       case "list":
-        return "w-[24rem]";
+        return "calc(100% - 24rem)";
       case "closed":
-        return "w-[0rem]";
+        return "100%";
     }
   }, [isMobile, panelState]);
+
+  const panelWidth = isMobile
+    ? "100%"
+    : panelState === "detail"
+      ? "50rem"
+      : "24rem";
 
   useEffect(() => {
     if (panelState === "closed") {
       setSelectedResource(null);
     }
   }, [panelState]);
+
+  if (panelState === "closed") {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {panelState !== "closed" && (
-        <motion.div
-          className={`fixed bottom-0 top-0 right-0 flex flex-col z-[5] pointer-events-auto pt-16 md:pb-4 md:pr-1 bg-white ${panelWidth}`}
-          initial={false}
-          exit={{ x: "100%" }}
-          animate={{ x: "0%" }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        >
-          <div className="flex-shrink-0 h-full border rounded-lg shadow-md relative">
-            <div className="flex flex-col gap-4">
-              <ResourceHeader
-                resource={selectedResource}
-                onClose={handleClose}
-              />
-              <div className="w-full overflow-y-auto h-full">
-                {selectedResource ? (
-                  <ResourceContent resource={selectedResource} />
-                ) : (
-                  <ResourceList resources={resources} onSelect={setResource} />
-                )}
-              </div>
-            </div>
+    <div
+      className={`fixed bottom-0 top-0 right-0 flex flex-col z-[5] pointer-events-auto pt-16 md:pb-4 md:pr-1 bg-white`}
+      style={{
+        width: panelWidth,
+        transform: `translateX(${panelTransform})`,
+      }}
+    >
+      <div className="flex-shrink-0 h-full border rounded-lg shadow-md relative">
+        <div className="flex flex-col gap-4">
+          <ResourceHeader resource={selectedResource} onClose={handleClose} />
+          <div className="w-full overflow-y-auto h-full">
+            {selectedResource ? (
+              <ResourceContent resource={selectedResource} />
+            ) : (
+              <ResourceList resources={resources} onSelect={setResource} />
+            )}
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </div>
   );
 }

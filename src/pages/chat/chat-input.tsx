@@ -1,14 +1,9 @@
 import { FileIcon, PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
-import { useChatContext } from "@/contexts/ChatContext";
-
-type ChatInputProps = {
-  onFileUpload: (file: File) => void;
-};
-
-export function ChatInput({ onFileUpload }: ChatInputProps) {
-  const { chatHook, onSubmit } = useChatContext();
+import { useChatContext } from "@/pages/chat/context";
+export function ChatInput() {
+  const { chatHook, onSubmit, uploadFiles } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -40,7 +35,7 @@ export function ChatInput({ onFileUpload }: ChatInputProps) {
   const handleFileUpload = () => {
     const file = fileInputRef.current?.files?.[0];
     if (file) {
-      onFileUpload(file);
+      uploadFiles([file]);
       fileInputRef.current.value = "";
     }
   };

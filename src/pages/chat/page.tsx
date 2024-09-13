@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
 import { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+// motionのインポートを削除
 import { deleteResourceById, getResources } from "@/data/resources";
 import { Resource } from "@/lib/db/schema/resources";
 import { MessageComponent } from "./message";
@@ -17,7 +17,8 @@ import { ContentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import ChatHeader from "./header";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
-import { ChatContextProvider, useChatContext } from "@/contexts/ChatContext";
+import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
+import React from "react";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -49,8 +50,12 @@ export async function loader(params: LoaderFunctionArgs) {
   return { messages, resources };
 }
 
+const Header = React.memo(ChatHeader);
+const Input = React.memo(ChatInput);
+const Content = React.memo(ContentPanel);
+
 function ChatPageContent() {
-  const { chatHook, panelState, setPanelState, uploadFiles } = useChatContext();
+  const { chatHook, panelState, setPanelState } = useChatContext();
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
 
@@ -78,37 +83,31 @@ function ChatPageContent() {
 
   return (
     <>
-      <ChatHeader toggleArchive={toggleArchive} />
+      <Header toggleArchive={toggleArchive} />
       <div className="flex flex-col h-full">
         <div className="flex-grow relative mx-auto">
           <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
             <div className="flex-grow overflow-y-auto" ref={scrollRef}>
-              <motion.div
-                className="p-2 sm:p-6 flex flex-col gap-4"
-                animate={{
+              <div
+                style={{
                   marginRight: animatePanelMargin,
                 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                initial={false}
               >
-                {chatHook.messages.map((message, index) => (
-                  <MessageComponent key={index} message={message} />
+                {chatHook.messages.map((message) => (
+                  <MessageComponent key={message.id} message={message} />
                 ))}
-              </motion.div>
+              </div>
             </div>
           </div>
-          <motion.div
-            className=""
-            animate={{
+          <div
+            style={{
               marginRight: animatePanelMargin,
             }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            initial={false}
           >
-            <ChatInput onFileUpload={(file) => uploadFiles([file])} />
-          </motion.div>
+            <Input />
+          </div>
         </div>
-        <ContentPanel />
+        <Content />
       </div>
     </>
   );
