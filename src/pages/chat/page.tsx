@@ -87,7 +87,7 @@ function ChatPageContent() {
               ))}
             </div>
           </div>
-          <div className="mx-auto w-full">
+          <div className="mx-auto w-full py-4">
             <ChatContainer>
               <Input />
             </ChatContainer>

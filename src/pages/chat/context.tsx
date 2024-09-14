@@ -22,6 +22,8 @@ import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
 import { Thread } from "@/lib/db/schema/thread";
+import { renameThread } from "@/data/threads";
+import { nameConversation } from "@/lib/ai/name-conversation";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -86,8 +88,19 @@ export const ChatContextProvider: React.FC<{
       const parsedMessage = JSON.parse(message);
       chatHook.append(parsedMessage);
       deleteFromLocalStorage(thread.id);
+      // non-blocking
+      nameConversation(parsedMessage.content)
+        .then((name) => renameThread(thread.id, name))
+        .then(() => revalidate());
     }
-  }, [thread.id, initialMessages.length, chatHook, openAlert, navigate]);
+  }, [
+    thread.id,
+    initialMessages.length,
+    chatHook,
+    openAlert,
+    navigate,
+    revalidate,
+  ]);
 
   const uploadFiles = useCallback(
     async (acceptedFiles: File[]) => {

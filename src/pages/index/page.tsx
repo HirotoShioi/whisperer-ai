@@ -1,12 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  createThread,
-  getThreads,
-  newThreadId,
-  renameThread,
-} from "@/data/threads";
+import { createThread, getThreads, newThreadId } from "@/data/threads";
 import { defer, useLoaderData, useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/db/schema/thread";
 import { Link } from "react-router-dom";
@@ -19,7 +14,17 @@ import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { applyMigrations } from "@/lib/db/migration";
 import React, { useState, useEffect } from "react";
-import { nameConversation } from "@/lib/ai/name-conversation";
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    return "Good morning";
+  } else if (hour >= 12 && hour < 18) {
+    return "Good afternoon";
+  } else {
+    return "Good evening";
+  }
+}
 
 export async function loader() {
   const threads = await getThreads().catch(() => []);
@@ -79,8 +84,6 @@ function NewChatForm() {
     const inputValue = input.current?.value ?? "";
     if (inputValue.length <= 0) return;
     await createThread(newId);
-    // non-blocking
-    nameConversation(inputValue).then((name) => renameThread(newId, name));
     const message = {
       role: "user" as const,
       content: inputValue,
@@ -123,13 +126,14 @@ function NewChatForm() {
 
 export default function IndexPage() {
   const { threads } = useLoaderData() as { threads: Thread[] };
+
   return (
     <>
       <Header />
       <div className="w-full">
         <main className="max-w-7xl mx-auto flex flex-col gap-8 2xl:pr-20">
-          <h2 className="text-4xl font-serif text-center mb-8">
-            Good afternoon
+          <h2 className="text-4xl font-serif text-center mb-4">
+            {getGreeting()}
           </h2>
           <NewChatForm />
 
