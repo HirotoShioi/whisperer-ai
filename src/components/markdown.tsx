@@ -28,12 +28,12 @@ export function Markdown({ content }: { content: string }) {
           th: ({ children }) => <TableHead>{children}</TableHead>,
           td: ({ children }) => <TableCell>{children}</TableCell>,
           ul: ({ children }) => (
-            <ul className="list-disc list-inside">{children}</ul>
+            <ul className="list-disc space-y-3">{children}</ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-inside">{children}</ol>
+            <ol className="list-decimal space-y-3">{children}</ol>
           ),
-          li: ({ children }) => <li>{children}</li>,
+          li: ({ children }) => <li className="list-item">{children}</li>,
           blockquote: ({ children }) => (
             <blockquote className="bg-slate-200 p-4 rounded-md">
               {children}
