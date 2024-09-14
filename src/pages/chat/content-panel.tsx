@@ -2,7 +2,7 @@ import { XIcon, FileIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Resource } from "@/lib/db/schema/resources";
 import { useFetcher } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Markdown } from "@/components/markdown";
@@ -131,7 +131,7 @@ function ResourceHeader({
   if (!resource) {
     return (
       <div className="sticky flex flex-col justify-between gap-2">
-        <div className="pb-6 top-0 p-3">
+        <div className="pb-6 top-0 p-4">
           <Dropdown />
         </div>
         <div className="flex justify-between items-center px-4">
@@ -165,7 +165,7 @@ export function ContentPanel() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
-  const isMobile = useMediaQuery("(max-width: 1430px)");
+  const isMobile = useMediaQuery("(max-width: 1400px)");
   const { panelState, setPanelState, resources, isUploadingContent } =
     useChatContext();
 
@@ -174,12 +174,6 @@ export function ContentPanel() {
     : panelState === "detail"
       ? "700px"
       : "300px";
-
-  useEffect(() => {
-    if (panelState === "closed") {
-      setSelectedResource(null);
-    }
-  }, [panelState]);
 
   function setResource(resource: Resource) {
     setSelectedResource(resource);
@@ -198,9 +192,7 @@ export function ContentPanel() {
   const isHidden = isMobile || panelState === "closed";
 
   return (
-    <div
-      className={`z-[5] pointer-events-auto md:pr-1 ${isHidden ? "hidden" : ""}`}
-    >
+    <div className={`z-[5] pointer-events-auto ${isHidden ? "hidden" : ""}`}>
       <div className="h-full shadow-md relative" style={{ width: panelWidth }}>
         <div className="flex flex-col gap-4">
           <ResourceHeader resource={selectedResource} onClose={handleClose} />

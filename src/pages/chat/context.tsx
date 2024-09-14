@@ -8,7 +8,7 @@ import React, {
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/use-chat";
 import { Resource } from "@/lib/db/schema/resources";
-import { useParams, useNavigate, useRevalidator } from "react-router-dom";
+import { useNavigate, useRevalidator } from "react-router-dom";
 import { useAlert } from "@/components/alert";
 import {
   loadFromLocalStorage,
@@ -21,6 +21,7 @@ import { saveMessage } from "@/data/messages";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
+import { Thread } from "@/lib/db/schema/thread";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -38,6 +39,7 @@ interface ChatContextType {
   setIsContentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isUploadingContent: boolean;
   setIsUploadingContent: React.Dispatch<React.SetStateAction<boolean>>;
+  thread: Thread;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -46,15 +48,15 @@ export const ChatContextProvider: React.FC<{
   children: React.ReactNode;
   initialMessages: Message[];
   initialResources: Resource[];
-}> = ({ children, initialMessages, initialResources }) => {
-  const { threadId } = useParams();
+  thread: Thread;
+}> = ({ children, initialMessages, initialResources, thread }) => {
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
   const [isUploadingContent, setIsUploadingContent] = useState(false);
   const navigate = useNavigate();
   const [isContentUploaderOpen, setIsContentUploaderOpen] = useState(false);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
-  const chatHook = useChat(threadId!, initialMessages);
+  const chatHook = useChat(thread.id, initialMessages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
     if (window.innerWidth < 768) {
       return "closed";
@@ -79,13 +81,13 @@ export const ChatContextProvider: React.FC<{
       });
       return;
     }
-    const message = loadFromLocalStorage(threadId!);
+    const message = loadFromLocalStorage(thread.id);
     if (message && initialMessages.length <= 0) {
       const parsedMessage = JSON.parse(message);
       chatHook.append(parsedMessage);
-      deleteFromLocalStorage(threadId!);
+      deleteFromLocalStorage(thread.id);
     }
-  }, [threadId, initialMessages.length, chatHook, openAlert, navigate]);
+  }, [thread.id, initialMessages.length, chatHook, openAlert, navigate]);
 
   const uploadFiles = useCallback(
     async (acceptedFiles: File[]) => {
@@ -113,7 +115,7 @@ export const ChatContextProvider: React.FC<{
           acceptedFiles.map(async (file) => {
             const { content, fileType } = await parseFile(file, file.type);
             await createResource({
-              threadId: threadId!,
+              threadId: thread.id,
               content,
               title: file.name,
               fileType,
@@ -153,7 +155,7 @@ export const ChatContextProvider: React.FC<{
         setIsUploadingContent(false);
       }
     },
-    [chatHook, revalidate, openAlert, threadId, scrollToEnd]
+    [chatHook, revalidate, openAlert, thread.id, scrollToEnd]
   );
 
   const uploadText = useCallback(
@@ -178,7 +180,7 @@ export const ChatContextProvider: React.FC<{
     await saveMessage({
       role: "user",
       content: chatHook.input,
-      threadId: threadId!,
+      threadId: thread.id,
     });
     chatHook.handleSubmit(e);
     scrollToEnd();
@@ -200,6 +202,7 @@ export const ChatContextProvider: React.FC<{
         setIsContentUploaderOpen,
         isUploadingContent,
         setIsUploadingContent,
+        thread,
       }}
     >
       {children}

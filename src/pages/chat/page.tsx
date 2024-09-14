@@ -6,7 +6,7 @@ import {
   redirect,
   useLoaderData,
 } from "react-router-dom";
-import { doesThreadExist } from "@/data/threads";
+import { doesThreadExist, getThreadById } from "@/data/threads";
 import { useEffect } from "react";
 import { deleteResourceById, getResources } from "@/data/resources";
 import { Resource } from "@/lib/db/schema/resources";
@@ -16,6 +16,7 @@ import { ContentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
+import { Thread } from "@/lib/db/schema/thread";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -42,9 +43,12 @@ export async function loader(params: LoaderFunctionArgs) {
   if (!exists) {
     return redirect(`/`);
   }
-  const messages = await getMessages(threadId);
-  const resources = await getResources(threadId);
-  return { messages, resources };
+  const [messages, resources, thread] = await Promise.all([
+    getMessages(threadId),
+    getResources(threadId),
+    getThreadById(threadId),
+  ]);
+  return { messages, resources, thread };
 }
 
 const Input = React.memo(ChatInput);
@@ -59,8 +63,8 @@ function ChatContainer({ children }: { children: React.ReactNode }) {
 }
 
 function ChatPageContent() {
-  const { chatHook, scrollRef, scrollToEnd } = useChatContext();
-  const isSmallScreen = useMediaQuery("(max-width: 1430px)");
+  const { chatHook, scrollRef, scrollToEnd, thread } = useChatContext();
+  const isSmallScreen = useMediaQuery("(max-width: 1000px)");
 
   useEffect(() => {
     scrollToEnd();
@@ -69,8 +73,11 @@ function ChatPageContent() {
   return (
     <div className="flex flex-row h-screen">
       {!isSmallScreen && <Content />}
-      <div className="w-full h-full">
-        <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
+      <div className="w-full h-full flex flex-col">
+        <header className="p-4">
+          <h1 className="text-xl font-bold text-gray-600">{thread.title}</h1>
+        </header>
+        <div className="flex-grow overflow-hidden flex flex-col">
           <div className="flex-grow overflow-y-auto" ref={scrollRef}>
             <div className="mx-auto">
               {chatHook.messages.map((message) => (
@@ -80,11 +87,11 @@ function ChatPageContent() {
               ))}
             </div>
           </div>
-        </div>
-        <div className="mx-auto">
-          <ChatContainer>
-            <Input />
-          </ChatContainer>
+          <div className="mx-auto w-full">
+            <ChatContainer>
+              <Input />
+            </ChatContainer>
+          </div>
         </div>
       </div>
     </div>
@@ -92,16 +99,21 @@ function ChatPageContent() {
 }
 
 export default function ChatPage() {
-  const { messages: initialMessages, resources: initialResources } =
-    useLoaderData() as {
-      messages: Message[];
-      resources: Resource[];
-    };
+  const {
+    messages: initialMessages,
+    resources: initialResources,
+    thread,
+  } = useLoaderData() as {
+    messages: Message[];
+    resources: Resource[];
+    thread: Thread;
+  };
 
   return (
     <ChatContextProvider
       initialMessages={initialMessages}
       initialResources={initialResources}
+      thread={thread}
     >
       <ChatPageContent />
     </ChatContextProvider>

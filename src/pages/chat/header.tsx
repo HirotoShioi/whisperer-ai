@@ -8,7 +8,7 @@ export type ChatHeaderProps = {
 
 export default function ChatHeader({ toggleArchive }: ChatHeaderProps) {
   return (
-    <header className="sticky top-0 p-3 mb-1.5 flex items-center justify-between z-10 h-14 font-semibold bg-token-main-surface-primary">
+    <header className="sticky top-0 p-4 mb-1.5 flex items-center justify-between z-10 h-14 font-semibold bg-token-main-surface-primary">
       <div className="flex items-center gap-8">
         <Dropdown />
       </div>
