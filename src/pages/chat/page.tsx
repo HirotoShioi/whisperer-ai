@@ -7,14 +7,13 @@ import {
   useLoaderData,
 } from "react-router-dom";
 import { doesThreadExist } from "@/data/threads";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { deleteResourceById, getResources } from "@/data/resources";
 import { Resource } from "@/lib/db/schema/resources";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { ContentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import ChatHeader from "./header";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 
@@ -48,7 +47,6 @@ export async function loader(params: LoaderFunctionArgs) {
   return { messages, resources };
 }
 
-const Header = React.memo(ChatHeader);
 const Input = React.memo(ChatInput);
 const Content = React.memo(ContentPanel);
 
@@ -61,67 +59,35 @@ function ChatContainer({ children }: { children: React.ReactNode }) {
 }
 
 function ChatPageContent() {
-  const { chatHook, panelState, setPanelState, scrollRef, scrollToEnd } =
-    useChatContext();
+  const { chatHook, scrollRef, scrollToEnd } = useChatContext();
   const isSmallScreen = useMediaQuery("(max-width: 1430px)");
 
   useEffect(() => {
     scrollToEnd();
   }, [scrollToEnd]);
 
-  const animatePanelMargin = useMemo(() => {
-    if (isSmallScreen) {
-      return "0px";
-    }
-    switch (panelState) {
-      case "detail":
-        return "40rem";
-      case "list":
-        return "24rem";
-      case "closed":
-        return "0px";
-    }
-  }, [isSmallScreen, panelState]);
-
-  const toggleArchive = () => {
-    panelState === "closed" ? setPanelState("list") : setPanelState("closed");
-  };
-
   return (
-    <>
-      <Header toggleArchive={toggleArchive} />
-      <div className="flex flex-col h-full">
-        <div className="flex-grow relative w-full">
-          <div className="flex flex-col h-[calc(100vh-150px)] overflow-hidden">
-            <div className="flex-grow overflow-y-auto" ref={scrollRef}>
-              <div
-                className="mx-auto"
-                style={{
-                  marginRight: animatePanelMargin,
-                }}
-              >
-                {chatHook.messages.map((message) => (
-                  <ChatContainer key={message.id}>
-                    <MessageComponent message={message} />
-                  </ChatContainer>
-                ))}
-              </div>
+    <div className="flex flex-row h-screen">
+      {!isSmallScreen && <Content />}
+      <div className="w-full h-full">
+        <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
+          <div className="flex-grow overflow-y-auto" ref={scrollRef}>
+            <div className="mx-auto">
+              {chatHook.messages.map((message) => (
+                <ChatContainer key={message.id}>
+                  <MessageComponent message={message} />
+                </ChatContainer>
+              ))}
             </div>
           </div>
-          <div
-            className="mx-auto"
-            style={{
-              marginRight: animatePanelMargin,
-            }}
-          >
-            <ChatContainer>
-              <Input />
-            </ChatContainer>
-          </div>
         </div>
-        {!isSmallScreen && <Content />}
+        <div className="mx-auto">
+          <ChatContainer>
+            <Input />
+          </ChatContainer>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { XIcon, FileIcon, ArrowLeftIcon } from "lucide-react";
+import { XIcon, FileIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Resource } from "@/lib/db/schema/resources";
 import { useFetcher } from "react-router-dom";
@@ -9,6 +9,7 @@ import { Markdown } from "@/components/markdown";
 import ContentUploader from "./content-uploader";
 import { useChatContext } from "@/pages/chat/context";
 import { Skeleton } from "@/components/ui/skeleton";
+import Dropdown from "@/components/dropdown";
 
 function ResourceItem({
   resource,
@@ -114,7 +115,7 @@ function ResourceContent({ resource }: { resource: Resource }) {
     }
   }, [resource.content, resource.fileType]);
   return (
-    <ScrollArea className="h-[calc(100vh-11rem)]">
+    <ScrollArea className="h-[calc(100vh-6rem)]">
       <div className="px-4 pb-4">{rendered}</div>
     </ScrollArea>
   );
@@ -129,29 +130,33 @@ function ResourceHeader({
 }) {
   if (!resource) {
     return (
-      <div className="flex justify-between items-center px-4 pt-4">
-        <div className="flex items-center">
-          <h2 className="text-lg font-semibold">Contents</h2>
-          <ContentUploader />
+      <div className="sticky flex flex-col justify-between gap-2">
+        <div className="pb-6 top-0 p-3">
+          <Dropdown />
         </div>
-        <XIcon className="h-6 w-6" onClick={onClose} />
+        <div className="flex justify-between items-center px-4">
+          <div className="flex items-center">
+            <h2 className="text-lg font-semibold">Contents</h2>
+            <ContentUploader />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex gap-2 flex-row w-full px-4 pt-4">
+      <div className="flex-1 flex items-center overflow-hidden">
+        <h2 className="text-lg font-semibold truncate">{resource.title}</h2>
+      </div>
       <Button
         variant="ghost"
         size="icon"
         onClick={onClose}
         className="rounded-full"
       >
-        <ArrowLeftIcon className="h-6 w-6" />
+        <X className="h-6 w-6" />
       </Button>
-      <div className="flex-1 flex items-center overflow-hidden">
-        <h2 className="text-lg font-semibold truncate">{resource.title}</h2>
-      </div>
     </div>
   );
 }
@@ -164,25 +169,11 @@ export function ContentPanel() {
   const { panelState, setPanelState, resources, isUploadingContent } =
     useChatContext();
 
-  const panelTransform = useMemo(() => {
-    if (isMobile) {
-      return panelState === "closed" ? "100%" : "0%";
-    }
-    switch (panelState) {
-      case "detail":
-        return "0%";
-      case "list":
-        return "calc(100% - 24rem)";
-      case "closed":
-        return "100%";
-    }
-  }, [isMobile, panelState]);
-
   const panelWidth = isMobile
     ? "100%"
     : panelState === "detail"
-      ? "40rem"
-      : "24rem";
+      ? "700px"
+      : "300px";
 
   useEffect(() => {
     if (panelState === "closed") {
@@ -208,23 +199,21 @@ export function ContentPanel() {
 
   return (
     <div
-      className={`fixed bottom-0 top-0 right-0 flex flex-col z-[5] pointer-events-auto pt-16 md:pb-4 md:pr-1 bg-white ${isHidden ? "hidden" : ""}`}
-      style={{
-        width: panelWidth,
-        transform: `translateX(${panelTransform})`,
-      }}
+      className={`z-[5] pointer-events-auto md:pr-1 ${isHidden ? "hidden" : ""}`}
     >
-      <div className="flex-shrink-0 h-full border rounded-lg shadow-md relative">
+      <div className="h-full shadow-md relative" style={{ width: panelWidth }}>
         <div className="flex flex-col gap-4">
           <ResourceHeader resource={selectedResource} onClose={handleClose} />
-          <div className="w-full overflow-y-auto h-full">
-            {isUploadingContent ? (
-              <ResourceListSkeleton />
-            ) : selectedResource ? (
-              <ResourceContent resource={selectedResource} />
-            ) : (
-              <ResourceList resources={resources} onSelect={setResource} />
-            )}
+          <div className="overflow-hidden">
+            <div className="w-full overflow-y-auto h-full">
+              {isUploadingContent ? (
+                <ResourceListSkeleton />
+              ) : selectedResource ? (
+                <ResourceContent resource={selectedResource} />
+              ) : (
+                <ResourceList resources={resources} onSelect={setResource} />
+              )}
+            </div>
           </div>
         </div>
       </div>

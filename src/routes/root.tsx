@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 export default function Root() {
   return (
     <>
-      <div className="flex flex-col h-screen">
+      <div className="">
         <AlertProvider>
           <Outlet />
           <Toaster />

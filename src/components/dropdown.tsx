@@ -37,7 +37,7 @@ export default function Dropdown() {
         className="flex items-center gap-2 cursor-pointer"
         onClick={() => navigate("/")}
       >
-        <h1 className="text-2xl">Whisperer</h1>
+        <h1 className="text-2xl font-bold">Whisperer</h1>
       </div>
     </div>
   );
