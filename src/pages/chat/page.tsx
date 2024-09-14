@@ -75,7 +75,7 @@ function ChatPageContent() {
       {!isSmallScreen && <Content />}
       <div className="w-full h-full flex flex-col">
         <header className="p-4">
-          <h1 className="text-xl font-bold text-gray-600">{thread.title}</h1>
+          <h1 className="text-xl text-gray-600">{thread.title}</h1>
         </header>
         <div className="flex-grow overflow-hidden flex flex-col">
           <div className="flex-grow overflow-y-auto" ref={scrollRef}>

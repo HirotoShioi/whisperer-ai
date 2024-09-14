@@ -10,6 +10,7 @@ import ContentUploader from "./content-uploader";
 import { useChatContext } from "@/pages/chat/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import Dropdown from "@/components/dropdown";
+import { cn } from "@/lib/utils";
 
 function ResourceItem({
   resource,
@@ -29,7 +30,7 @@ function ResourceItem({
       className="flex items-center p-2 bg-white rounded-lg shadow-md border hover:bg-gray-50 transition cursor-pointer w-full"
       onClick={() => onSelect(resource)}
     >
-      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg mr-3">
+      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
         <FileIcon className="w-6 h-6 text-gray-600" />
       </div>
       <div className="flex-1 flex items-center overflow-hidden">
@@ -69,9 +70,9 @@ function ResourceList({
 }) {
   if (resources.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-4">
-        <FileIcon className="w-10 h-10 text-gray-500" />
-        <p className="text-gray-500 text-sm text-center mt-2">
+      <div className="flex flex-row items-center justify-center px-2 gap-4">
+        <FileIcon className="w-8 h-8 text-gray-500" />
+        <p className="text-gray-500 text-sm mt-2">
           Drag and drop files into the chat to add them as resources.
         </p>
       </div>
@@ -131,7 +132,7 @@ function ResourceHeader({
   if (!resource) {
     return (
       <div className="sticky flex flex-col justify-between gap-2">
-        <div className="pb-6 top-0 p-4">
+        <div className="pb-6 top-0 p-4 flex items-center">
           <Dropdown />
         </div>
         <div className="flex justify-between items-center px-4">
@@ -145,19 +146,21 @@ function ResourceHeader({
   }
 
   return (
-    <div className="flex gap-2 flex-row w-full px-4 pt-4">
-      <div className="flex-1 flex items-center overflow-hidden">
-        <h2 className="text-lg font-semibold truncate">{resource.title}</h2>
+    <>
+      <div className="flex gap-2 flex-row w-full px-4 pt-4">
+        <div className="flex-1 flex items-center overflow-hidden">
+          <h2 className="text-lg font-semibold truncate">{resource.title}</h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="rounded-full"
+        >
+          <X className="h-6 w-6" />
+        </Button>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClose}
-        className="rounded-full"
-      >
-        <X className="h-6 w-6" />
-      </Button>
-    </div>
+    </>
   );
 }
 
@@ -193,7 +196,13 @@ export function ContentPanel() {
 
   return (
     <div className={`z-[5] pointer-events-auto ${isHidden ? "hidden" : ""}`}>
-      <div className="h-full shadow-md relative" style={{ width: panelWidth }}>
+      <div
+        className={cn(
+          "h-full shadow-md relative",
+          panelState === "detail" ? "bg-white" : "bg-gray-50"
+        )}
+        style={{ width: panelWidth }}
+      >
         <div className="flex flex-col gap-4">
           <ResourceHeader resource={selectedResource} onClose={handleClose} />
           <div className="overflow-hidden">
