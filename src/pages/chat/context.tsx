@@ -35,8 +35,9 @@ interface ChatContextType {
   scrollRef: (element: HTMLDivElement | null) => void;
   scrollToEnd: () => void;
   isContentUploaderOpen: boolean;
-  openContentUploader: () => void;
-  closeContentUploader: () => void;
+  setIsContentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isUploadingContent: boolean;
+  setIsUploadingContent: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -49,6 +50,7 @@ export const ChatContextProvider: React.FC<{
   const { threadId } = useParams();
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
+  const [isUploadingContent, setIsUploadingContent] = useState(false);
   const navigate = useNavigate();
   const [isContentUploaderOpen, setIsContentUploaderOpen] = useState(false);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
@@ -87,6 +89,8 @@ export const ChatContextProvider: React.FC<{
 
   const uploadFiles = useCallback(
     async (acceptedFiles: File[]) => {
+      setIsUploadingContent(true);
+      setIsContentUploaderOpen(false);
       if (acceptedFiles.length <= 0) {
         return;
       }
@@ -104,58 +108,67 @@ export const ChatContextProvider: React.FC<{
         });
         return;
       }
-      const fileWithText = await Promise.all(
-        acceptedFiles.map(async (file) => {
-          const { content, fileType } = await parseFile(file, file.type);
-          await createResource({
-            threadId: threadId!,
-            content,
-            title: file.name,
-            fileType,
-          });
-          return {
-            text: content,
-            file,
-          };
-        })
-      );
-      const message: Message = {
-        id: nanoid(),
-        role: "assistant" as const,
-        content: "",
-        toolInvocations: fileWithText.map(({ text, file }) => ({
-          state: "result" as const,
-          toolCallId: nanoid(),
-          toolName: "addResource",
-          args: {},
-          result: {
-            success: true,
-            fileId: nanoid(),
-            file: {
-              name: file.name,
-              size: file.size,
-              type: file.type,
+      try {
+        const fileWithText = await Promise.all(
+          acceptedFiles.map(async (file) => {
+            const { content, fileType } = await parseFile(file, file.type);
+            await createResource({
+              threadId: threadId!,
+              content,
+              title: file.name,
+              fileType,
+            });
+            return {
+              text: content,
+              file,
+            };
+          })
+        );
+        const message: Message = {
+          id: nanoid(),
+          role: "assistant" as const,
+          content: "",
+          toolInvocations: fileWithText.map(({ text, file }) => ({
+            state: "result" as const,
+            toolCallId: nanoid(),
+            toolName: "addResource",
+            args: {},
+            result: {
+              success: true,
+              fileId: nanoid(),
+              file: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+              },
+              preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
             },
-            preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
-          },
-        })),
-      };
-      chatHook.append(message);
-      setPanelState("list");
-      revalidate();
-      scrollToEnd();
+          })),
+        };
+        chatHook.append(message);
+        setPanelState("list");
+        revalidate();
+        scrollToEnd();
+      } finally {
+        setIsUploadingContent(false);
+      }
     },
     [chatHook, revalidate, openAlert, threadId, scrollToEnd]
   );
 
   const uploadText = useCallback(
     async (text: string) => {
-      const markdown = await convertTextToMarkdown(text);
-      // upload markdown as a file
-      const file = new File([markdown.content], markdown.title, {
-        type: "text/markdown",
-      });
-      await uploadFiles([file]);
+      setIsUploadingContent(true);
+      setIsContentUploaderOpen(false);
+      try {
+        const markdown = await convertTextToMarkdown(text);
+        const file = new File([markdown.content], markdown.title, {
+          type: "text/markdown",
+        });
+        await uploadFiles([file]);
+      } finally {
+        setIsUploadingContent(false);
+      }
     },
     [uploadFiles]
   );
@@ -184,8 +197,9 @@ export const ChatContextProvider: React.FC<{
         scrollRef,
         scrollToEnd,
         isContentUploaderOpen,
-        openContentUploader: () => setIsContentUploaderOpen(true),
-        closeContentUploader: () => setIsContentUploaderOpen(false),
+        setIsContentUploaderOpen,
+        isUploadingContent,
+        setIsUploadingContent,
       }}
     >
       {children}

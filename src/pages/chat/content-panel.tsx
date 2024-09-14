@@ -8,6 +8,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Markdown } from "@/components/markdown";
 import ContentUploader from "./content-uploader";
 import { useChatContext } from "@/pages/chat/context";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function ResourceItem({
   resource,
@@ -48,6 +49,16 @@ function ResourceItem({
   );
 }
 
+function ResourceItemSkeleton() {
+  return (
+    <div className="flex items-center p-2 bg-white rounded-lg shadow-md border w-full">
+      <Skeleton className="w-10 h-10 rounded-lg mr-3" />
+      <Skeleton className="flex-1 h-5" />
+      <Skeleton className="w-8 h-8 rounded-full ml-2" />
+    </div>
+  );
+}
+
 function ResourceList({
   resources,
   onSelect,
@@ -70,6 +81,16 @@ function ResourceList({
     <div className="flex flex-col gap-2 w-full px-4">
       {resources.map((resource, index) => (
         <ResourceItem key={index} resource={resource} onSelect={onSelect} />
+      ))}
+    </div>
+  );
+}
+
+function ResourceListSkeleton() {
+  return (
+    <div className="flex flex-col gap-2 w-full px-4">
+      {[...Array(5)].map((_, index) => (
+        <ResourceItemSkeleton key={index} />
       ))}
     </div>
   );
@@ -109,7 +130,7 @@ function ResourceHeader({
   if (!resource) {
     return (
       <div className="flex justify-between items-center px-4 pt-4">
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center">
           <h2 className="text-lg font-semibold">Contents</h2>
           <ContentUploader />
         </div>
@@ -140,7 +161,8 @@ export function ContentPanel() {
     null
   );
   const isMobile = useMediaQuery("(max-width: 1430px)");
-  const { panelState, setPanelState, resources } = useChatContext();
+  const { panelState, setPanelState, resources, isUploadingContent } =
+    useChatContext();
 
   const panelTransform = useMemo(() => {
     if (isMobile) {
@@ -167,9 +189,6 @@ export function ContentPanel() {
       setSelectedResource(null);
     }
   }, [panelState]);
-  if (isMobile || panelState === "closed") {
-    return null;
-  }
 
   function setResource(resource: Resource) {
     setSelectedResource(resource);
@@ -185,9 +204,11 @@ export function ContentPanel() {
     }
   };
 
+  const isHidden = isMobile || panelState === "closed";
+
   return (
     <div
-      className={`fixed bottom-0 top-0 right-0 flex flex-col z-[5] pointer-events-auto pt-16 md:pb-4 md:pr-1 bg-white`}
+      className={`fixed bottom-0 top-0 right-0 flex flex-col z-[5] pointer-events-auto pt-16 md:pb-4 md:pr-1 bg-white ${isHidden ? "hidden" : ""}`}
       style={{
         width: panelWidth,
         transform: `translateX(${panelTransform})`,
@@ -197,7 +218,9 @@ export function ContentPanel() {
         <div className="flex flex-col gap-4">
           <ResourceHeader resource={selectedResource} onClose={handleClose} />
           <div className="w-full overflow-y-auto h-full">
-            {selectedResource ? (
+            {isUploadingContent ? (
+              <ResourceListSkeleton />
+            ) : selectedResource ? (
               <ResourceContent resource={selectedResource} />
             ) : (
               <ResourceList resources={resources} onSelect={setResource} />

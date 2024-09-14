@@ -19,14 +19,12 @@ export default function ContentUploader() {
   const {
     uploadFiles,
     uploadText,
-    openContentUploader,
     isContentUploaderOpen,
-    closeContentUploader,
+    setIsContentUploaderOpen,
   } = useChatContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const onDrop = async (acceptedFiles: File[]) => {
-    closeContentUploader();
     await uploadFiles(acceptedFiles);
   };
 
@@ -44,16 +42,13 @@ export default function ContentUploader() {
   const handleSubmit = async () => {
     if (textAreaRef.current?.value) {
       await uploadText(textAreaRef.current.value);
-      closeContentUploader();
     }
   };
 
   return (
     <Dialog
       open={isContentUploaderOpen}
-      onOpenChange={(open) =>
-        open ? openContentUploader() : closeContentUploader()
-      }
+      onOpenChange={setIsContentUploaderOpen}
     >
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="w-8 h-8">

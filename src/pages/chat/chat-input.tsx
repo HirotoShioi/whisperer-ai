@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
 export function ChatInput() {
-  const { chatHook, onSubmit, openContentUploader } = useChatContext();
+  const { chatHook, onSubmit, setIsContentUploaderOpen } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -37,7 +37,7 @@ export function ChatInput() {
         <div className="relative">
           <Button
             className="mr-2 p-2 rounded-full"
-            onClick={openContentUploader}
+            onClick={() => setIsContentUploaderOpen(true)}
             size="icon"
           >
             <FileIcon className="h-4 w-4" />
