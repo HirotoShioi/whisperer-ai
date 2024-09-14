@@ -50,10 +50,8 @@ export default function ContentUploader() {
       open={isContentUploaderOpen}
       onOpenChange={setIsContentUploaderOpen}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="w-8 h-8">
-          <CirclePlus size={20} />
-        </Button>
+      <DialogTrigger asChild className="focus:outline-none">
+        <CirclePlus size={20} className="focus:outline-none cursor-pointer" />
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>

@@ -136,7 +136,7 @@ function ResourceHeader({
           <Dropdown />
         </div>
         <div className="flex justify-between items-center px-4">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">Contents</h2>
             <ContentUploader />
           </div>
