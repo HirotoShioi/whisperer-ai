@@ -34,6 +34,9 @@ interface ChatContextType {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   scrollRef: (element: HTMLDivElement | null) => void;
   scrollToEnd: () => void;
+  isContentUploaderOpen: boolean;
+  openContentUploader: () => void;
+  closeContentUploader: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -47,6 +50,7 @@ export const ChatContextProvider: React.FC<{
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
   const navigate = useNavigate();
+  const [isContentUploaderOpen, setIsContentUploaderOpen] = useState(false);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
   const chatHook = useChat(threadId!, initialMessages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
@@ -179,6 +183,9 @@ export const ChatContextProvider: React.FC<{
         onSubmit,
         scrollRef,
         scrollToEnd,
+        isContentUploaderOpen,
+        openContentUploader: () => setIsContentUploaderOpen(true),
+        closeContentUploader: () => setIsContentUploaderOpen(false),
       }}
     >
       {children}

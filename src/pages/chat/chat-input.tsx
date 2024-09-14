@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
 export function ChatInput() {
-  const { chatHook, onSubmit, uploadFiles } = useChatContext();
+  const { chatHook, onSubmit, openContentUploader } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -32,27 +31,13 @@ export function ChatInput() {
     chatHook.handleInputChange(e);
   };
 
-  const handleFileUpload = () => {
-    const file = fileInputRef.current?.files?.[0];
-    if (file) {
-      uploadFiles([file]);
-      fileInputRef.current.value = "";
-    }
-  };
-
   return (
     <div className="p-2 bg-muted lg:gap-1 rounded-[26px] border-2 border-gray-300 shadow-md w-full">
       <div className="flex items-end gap-1.5 md:gap-2">
         <div className="relative">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            className="hidden"
-          />
           <Button
             className="mr-2 p-2 rounded-full"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={openContentUploader}
             size="icon"
           >
             <FileIcon className="h-4 w-4" />

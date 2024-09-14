@@ -1,6 +1,6 @@
 // src/components/LargeDialog.jsx
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   Dialog,
@@ -16,12 +16,17 @@ import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
 
 export default function ContentUploader() {
-  const { uploadFiles, uploadText } = useChatContext();
+  const {
+    uploadFiles,
+    uploadText,
+    openContentUploader,
+    isContentUploaderOpen,
+    closeContentUploader,
+  } = useChatContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
 
   const onDrop = async (acceptedFiles: File[]) => {
-    setIsOpen(false);
+    closeContentUploader();
     await uploadFiles(acceptedFiles);
   };
 
@@ -38,15 +43,20 @@ export default function ContentUploader() {
 
   const handleSubmit = async () => {
     if (textAreaRef.current?.value) {
-      setIsOpen(false);
       await uploadText(textAreaRef.current.value);
+      closeContentUploader();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isContentUploaderOpen}
+      onOpenChange={(open) =>
+        open ? openContentUploader() : closeContentUploader()
+      }
+    >
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="transition-all w-8 h-8">
+        <Button variant="ghost" size="icon" className="w-8 h-8">
           <CirclePlus size={20} />
         </Button>
       </DialogTrigger>
