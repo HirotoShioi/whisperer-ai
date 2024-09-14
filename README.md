@@ -47,11 +47,11 @@ Whisperer utilizes the `pglite` library to store all data locally in IndexedDB. 
 
 4. Open `http://localhost:3000` in your browser to use the app.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
 ## References
 
 - [Supabase Community - Postgres New](https://github.com/supabase-community/postgres-new/tree/main/apps/postgres-new)
 - [Vercel AI SDK Documentation](https://sdk.vercel.ai/docs/introduction)
+
+## License
+
+Apache 2.0
