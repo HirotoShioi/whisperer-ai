@@ -4,7 +4,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Menu } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export function HeaderMenuItem({
   href,
@@ -21,15 +22,23 @@ export function HeaderMenuItem({
 }
 
 export default function Dropdown() {
+  const navigate = useNavigate();
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Menu size={20} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <HeaderMenuItem href="/settings">Settings</HeaderMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <div
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => navigate("/")}
+      >
         <h1 className="text-2xl">Whisperer</h1>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <HeaderMenuItem href="/">Chat</HeaderMenuItem>
-        <HeaderMenuItem href="/settings">Settings</HeaderMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </div>
   );
 }

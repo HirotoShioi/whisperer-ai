@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // AlertDialogをインポート
 import { applyMigrations } from "@/lib/db/migration";
+import { DB_NAME } from "@/constants";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -70,7 +71,7 @@ export default function SettingsPage() {
   }
 
   async function handleDeleteDatabase() {
-    indexedDB.deleteDatabase("/pglite/playground");
+    indexedDB.deleteDatabase(`/pglite/${DB_NAME}`);
     await applyMigrations();
     toast({
       variant: "success",
