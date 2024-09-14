@@ -14,6 +14,7 @@ import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { applyMigrations } from "@/lib/db/migration";
 import React, { useState, useEffect } from "react";
+import { BASE_CHAT_MODEL } from "@/constants";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -116,7 +117,9 @@ function NewChatForm() {
                 <span className="sr-only">Send</span>
               </Button>
             </form>
-            <div className="text-sm text-gray-500">Model: gpt-4o-mini</div>
+            <div className="text-sm text-gray-500">
+              Model: {BASE_CHAT_MODEL}
+            </div>
           </div>
         </CardContent>
       </Card>

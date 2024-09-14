@@ -1,10 +1,14 @@
 import { embed, embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { loadFromLocalStorage } from "@/utils/local-storage";
 import { embeddings } from "../db/schema/embeddings";
 import { cosineDistance, sql, gt, desc, eq, and } from "drizzle-orm";
 import { db } from "@/providers/pglite";
 import { SIMILARITY_THRESHOLD, VECTOR_SEARCH_K } from "@/constants";
+
+const embeddingModel = createOpenAI({
+  apiKey: "DUMMY_API_KEY",
+  baseURL: import.meta.env.VITE_API_URL,
+}).embedding("text-embedding-3-small");
 
 /**
  * Generates embeddings for a list of documents.
@@ -14,13 +18,6 @@ import { SIMILARITY_THRESHOLD, VECTOR_SEARCH_K } from "@/constants";
 export const generateEmbeddings = async (
   documents: string[]
 ): Promise<{ embeddings: number[]; content: string }[]> => {
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    throw new Error("No API key");
-  }
-  const embeddingModel = createOpenAI({
-    apiKey: apiKey,
-  }).embedding("text-embedding-3-small");
   const { embeddings } = await embedMany({
     model: embeddingModel,
     values: documents,
@@ -36,13 +33,6 @@ export const generateEmbeddings = async (
 export const generateEmbedding = async (
   document: string
 ): Promise<{ embedding: number[]; content: string }> => {
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    throw new Error("No API key");
-  }
-  const embeddingModel = createOpenAI({
-    apiKey: apiKey,
-  }).embedding("text-embedding-3-small");
   const { embedding } = await embed({
     model: embeddingModel,
     value: document,

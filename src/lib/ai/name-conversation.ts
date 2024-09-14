@@ -1,7 +1,7 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { loadFromLocalStorage } from "@/utils/local-storage";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { getModel } from "./model";
+import { BASE_CHAT_MODEL } from "@/constants";
 
 /**
  * Names a conversation.
@@ -9,13 +9,8 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
  * @returns The name of the conversation.
  */
 export async function nameConversation(message: string): Promise<string> {
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    throw new Error("OpenAI API key not found");
-  }
-  const model = new ChatOpenAI({
-    model: "gpt-4o-mini",
-    apiKey: apiKey,
+  const model = getModel({
+    model: BASE_CHAT_MODEL,
     temperature: 0.5,
   });
   const messages = [

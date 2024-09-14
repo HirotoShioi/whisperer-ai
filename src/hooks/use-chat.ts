@@ -1,10 +1,10 @@
 import { useChat as c } from "ai/react";
 import { convertToCoreMessages, Message, streamText, tool } from "ai";
 import { saveMessage } from "@/data/messages";
-import { loadFromLocalStorage } from "@/utils/local-storage";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { findRelevantContent } from "@/lib/ai/embeddings";
+import { BASE_CHAT_MODEL } from "@/constants";
 
 export function useChat(threadId: string, initialMessages?: Message[]) {
   const chat = c({
@@ -47,14 +47,12 @@ async function handleChat(req: Request) {
     return Response.json({ error: "No body" }, { status: 404 });
   }
   const { messages } = body as { messages: any[] };
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    return Response.json({ error: "No API key" }, { status: 500 });
-  }
+  const model = createOpenAI({
+    apiKey: "DUMMY_API_KEY",
+    baseURL: import.meta.env.VITE_API_URL,
+  }).chat(BASE_CHAT_MODEL);
   const result = await streamText({
-    model: createOpenAI({
-      apiKey: apiKey,
-    }).chat("gpt-4o-mini"),
+    model: model,
     system: `You are a helpful assistant that can answer questions and help with tasks. You have access to a knowledge base that you can use to find relevant information. You can use the tools below to help you with your tasks.
       First, introduce yourself as a helpful assistant.
       Then, answer the user's question.
