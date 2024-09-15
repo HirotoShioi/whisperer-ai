@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/use-chat";
 import { Document } from "@/lib/database/schema";
@@ -24,6 +18,7 @@ import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
 import { Thread } from "@/lib/database/schema";
 import { renameThread } from "@/services/threads";
 import { nameConversation } from "@/lib/ai/name-conversation";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -57,6 +52,7 @@ export const ChatContextProvider: React.FC<{
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const navigate = useNavigate();
   const [isDocumentUploaderOpen, setIsDocumentUploaderOpen] = useState(false);
+  const { user } = useAuthenticator((c) => [c.user]);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
   const chatHook = useChat(thread.id, initialMessages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
@@ -66,6 +62,20 @@ export const ChatContextProvider: React.FC<{
     return "list";
   });
 
+  async function redirectIfUnauthenticated() {
+    openAlert({
+      title: "Please sign in",
+      description: "Please sign in to use this feature",
+      actions: [
+        {
+          label: "OK",
+          onClick: () => {
+            navigate("/sign-in");
+          },
+        },
+      ],
+    });
+  }
   useEffect(() => {
     const apiKey = loadFromLocalStorage("openAIAPIKey");
     if (!apiKey) {
@@ -102,93 +112,97 @@ export const ChatContextProvider: React.FC<{
     revalidate,
   ]);
 
-  const uploadFiles = useCallback(
-    async (acceptedFiles: File[]) => {
-      setIsUploadingDocuments(true);
-      setIsDocumentUploaderOpen(false);
-      if (acceptedFiles.length <= 0) {
-        return;
-      }
-      if (
-        acceptedFiles.some((file) => file.size >= MAXIMUM_FILE_SIZE_IN_BYTES)
-      ) {
-        openAlert({
-          title: "File size is too large",
-          description: "Please upload files smaller than 5MB",
-          actions: [
-            {
-              label: "OK",
+  async function uploadFiles(acceptedFiles: File[]) {
+    if (!user) {
+      await redirectIfUnauthenticated();
+      return;
+    }
+    setIsUploadingDocuments(true);
+    setIsDocumentUploaderOpen(false);
+    if (acceptedFiles.length <= 0) {
+      return;
+    }
+    if (acceptedFiles.some((file) => file.size >= MAXIMUM_FILE_SIZE_IN_BYTES)) {
+      openAlert({
+        title: "File size is too large",
+        description: "Please upload files smaller than 5MB",
+        actions: [
+          {
+            label: "OK",
+          },
+        ],
+      });
+      return;
+    }
+    try {
+      const fileWithText = await Promise.all(
+        acceptedFiles.map(async (file) => {
+          const { content, fileType } = await parseFile(file, file.type);
+          await saveDocument({
+            threadId: thread.id,
+            content,
+            title: file.name,
+            fileType,
+          });
+          return {
+            text: content,
+            file,
+          };
+        })
+      );
+      const message: Message = {
+        id: nanoid(),
+        role: "assistant" as const,
+        content: "",
+        toolInvocations: fileWithText.map(({ text, file }) => ({
+          state: "result" as const,
+          toolCallId: nanoid(),
+          toolName: "saveDocument",
+          args: {},
+          result: {
+            success: true,
+            fileId: nanoid(),
+            file: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
             },
-          ],
-        });
-        return;
-      }
-      try {
-        const fileWithText = await Promise.all(
-          acceptedFiles.map(async (file) => {
-            const { content, fileType } = await parseFile(file, file.type);
-            await saveDocument({
-              threadId: thread.id,
-              content,
-              title: file.name,
-              fileType,
-            });
-            return {
-              text: content,
-              file,
-            };
-          })
-        );
-        const message: Message = {
-          id: nanoid(),
-          role: "assistant" as const,
-          content: "",
-          toolInvocations: fileWithText.map(({ text, file }) => ({
-            state: "result" as const,
-            toolCallId: nanoid(),
-            toolName: "saveDocument",
-            args: {},
-            result: {
-              success: true,
-              fileId: nanoid(),
-              file: {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-              },
-              preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
-            },
-          })),
-        };
-        chatHook.append(message);
-        setPanelState("list");
-        revalidate();
-        scrollToEnd();
-      } finally {
-        setIsUploadingDocuments(false);
-      }
-    },
-    [chatHook, revalidate, openAlert, thread.id, scrollToEnd]
-  );
+            preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
+          },
+        })),
+      };
+      chatHook.append(message);
+      setPanelState("list");
+      revalidate();
+      scrollToEnd();
+    } finally {
+      setIsUploadingDocuments(false);
+    }
+  }
 
-  const uploadText = useCallback(
-    async (text: string) => {
-      setIsUploadingDocuments(true);
-      setIsDocumentUploaderOpen(false);
-      try {
-        const markdown = await convertTextToMarkdown(text);
-        const file = new File([markdown.content], markdown.title, {
-          type: "text/markdown",
-        });
-        await uploadFiles([file]);
-      } finally {
-        setIsUploadingDocuments(false);
-      }
-    },
-    [uploadFiles]
-  );
+  const uploadText = async (text: string) => {
+    if (!user) {
+      await redirectIfUnauthenticated();
+      return;
+    }
+    setIsUploadingDocuments(true);
+    setIsDocumentUploaderOpen(false);
+    try {
+      const markdown = await convertTextToMarkdown(text);
+      const file = new File([markdown.content], markdown.title, {
+        type: "text/markdown",
+      });
+      await uploadFiles([file]);
+    } finally {
+      setIsUploadingDocuments(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!user) {
+      await redirectIfUnauthenticated();
+      return;
+    }
     if (chatHook.input.length <= 0) return;
     await saveMessage({
       role: "user",
