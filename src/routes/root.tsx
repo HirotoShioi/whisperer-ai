@@ -11,6 +11,9 @@ export default function Root() {
       if (data.payload.event === "signedOut") {
         navigate("/");
       }
+      if (data.payload.event === "signedIn") {
+        navigate("/");
+      }
     });
   }, [navigate]);
   return (
