@@ -13,7 +13,7 @@ import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-const resources = pgTable("resources", {
+const documents = pgTable("documents", {
   id: varchar("id", { length: MAX_VARCHAR_LENGTH })
     .primaryKey()
     .$defaultFn(() => nanoid()),
@@ -29,8 +29,8 @@ const resources = pgTable("resources", {
     .default(sql`now()`),
 });
 
-// Schema for resources - used to validate API requests
-export const insertResourceSchema = createSelectSchema(resources)
+// Schema for documents - used to validate API requests
+export const insertDocumentSchema = createSelectSchema(documents)
   .extend({})
   .omit({
     id: true,
@@ -38,9 +38,9 @@ export const insertResourceSchema = createSelectSchema(resources)
     updatedAt: true,
   });
 
-// Type for resources - used to type API request params and within Components
-export type NewResourceParams = z.infer<typeof insertResourceSchema>;
-export type Resource = typeof resources.$inferSelect;
+// Type for documents - used to type API request params and within Components
+export type NewDocumentParams = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
 
 const embeddings = pgTable(
   "embeddings",
@@ -48,9 +48,9 @@ const embeddings = pgTable(
     id: varchar("id", { length: MAX_VARCHAR_LENGTH })
       .primaryKey()
       .$defaultFn(() => nanoid()),
-    resourceId: varchar("resource_id", {
+    documentId: varchar("document_id", {
       length: MAX_VARCHAR_LENGTH,
-    }).references(() => resources.id, { onDelete: "cascade" }),
+    }).references(() => documents.id, { onDelete: "cascade" }),
     threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH }).notNull(),
     content: text("content").notNull(),
     embedding: vector("embedding", {
@@ -116,6 +116,6 @@ export type Thread = typeof threads.$inferSelect;
 export const schema = {
   embeddings,
   messages,
-  resources,
+  documents,
   threads,
 };

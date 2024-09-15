@@ -60,7 +60,7 @@ async function handleChat(req: Request) {
     messages: convertToCoreMessages(messages),
     tools: {
       getRelavantInformation: getRelavantInformationTool(threadId),
-      addResource: addResourceTool(threadId),
+      saveDocument: saveDocumentTool(threadId),
     },
   });
   return result.toDataStreamResponse();
@@ -93,13 +93,13 @@ function getRelavantInformationTool(threadId: string) {
   });
 }
 
-function addResourceTool(threadId: string) {
+function saveDocumentTool(threadId: string) {
   return tool({
-    description: "Add a resource to the knowledge base.",
+    description: "Add a document to the knowledge base.",
     parameters: z.object({
-      title: z.string().describe("The title of the resource."),
-      content: z.string().describe("The content of the resource."),
-      fileType: z.string().describe("The file type of the resource."),
+      title: z.string().describe("The title of the document."),
+      content: z.string().describe("The content of the document."),
+      fileType: z.string().describe("The file type of the document."),
     }),
     execute: async ({ title, content, fileType }) => {
       console.log(title, content, fileType, threadId);
@@ -107,4 +107,4 @@ function addResourceTool(threadId: string) {
   });
 }
 
-export type ToolNames = "getRelavantInformation" | "addResource";
+export type ToolNames = "getRelavantInformation" | "saveDocument";

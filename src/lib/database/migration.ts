@@ -20,7 +20,7 @@ const drizzleMigrations = pgTable("__drizzle_migrations", {
 
 export const migrations = [
   "CREATE EXTENSION IF NOT EXISTS vector;",
-  `CREATE TABLE IF NOT EXISTS "resources" (
+  `CREATE TABLE IF NOT EXISTS "documents" (
     "id" varchar(191) PRIMARY KEY NOT NULL,
     "title" text NOT NULL,
     "thread_id" varchar(191) NOT NULL,
@@ -31,13 +31,13 @@ export const migrations = [
   );`,
   `CREATE TABLE IF NOT EXISTS "embeddings" (
     "id" varchar(191) PRIMARY KEY NOT NULL,
-    "resource_id" varchar(191) NOT NULL,
+    "document_id" varchar(191) NOT NULL,
     "thread_id" varchar(191) NOT NULL,
     "content" text NOT NULL,
     "embedding" vector(1536) NOT NULL,
     "created_at" timestamp DEFAULT now() NOT NULL,
     "updated_at" timestamp DEFAULT now() NOT NULL,
-    FOREIGN KEY ("resource_id") REFERENCES "resources" ("id") ON DELETE CASCADE
+    FOREIGN KEY ("document_id") REFERENCES "documents" ("id") ON DELETE CASCADE
   );`,
   `CREATE INDEX IF NOT EXISTS "embeddingIndex" ON "embeddings" USING hnsw (embedding vector_cosine_ops);`,
   `CREATE TABLE IF NOT EXISTS "threads" (

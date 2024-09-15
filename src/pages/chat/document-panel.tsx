@@ -1,23 +1,23 @@
 import { XIcon, FileIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Resource } from "@/lib/database/schema";
+import type { Document } from "@/lib/database/schema";
 import { useFetcher } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Markdown } from "@/components/markdown";
-import ContentUploader from "./content-uploader";
+import DocumentUploader from "./document-uploader";
 import { useChatContext } from "@/pages/chat/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import Dropdown from "@/components/dropdown";
 import { cn } from "@/lib/utils";
 
 function DocumentItem({
-  resource,
+  document,
   onSelect,
 }: {
-  resource: Resource;
-  onSelect: (resource: Resource) => void;
+  document: Document;
+  onSelect: (document: Document) => void;
 }) {
   const fetcher = useFetcher();
 
@@ -28,16 +28,16 @@ function DocumentItem({
   return (
     <div
       className="flex items-center p-2 bg-white rounded-lg shadow-md border hover:bg-gray-50 transition cursor-pointer w-full"
-      onClick={() => onSelect(resource)}
+      onClick={() => onSelect(document)}
     >
       <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
         <FileIcon className="w-6 h-6 text-gray-600" />
       </div>
       <div className="flex-1 flex items-center overflow-hidden">
-        <p className="text-sm font-medium truncate">{resource.title}</p>
+        <p className="text-sm font-medium truncate">{document.title}</p>
       </div>
       <fetcher.Form method="DELETE" onClick={handleDelete}>
-        <input type="hidden" name="resourceId" value={resource.id} />
+        <input type="hidden" name="documentId" value={document.id} />
         <Button
           className="text-gray-400 hover:text-red-600"
           size="icon"
@@ -62,18 +62,18 @@ function DocumentItemSkeleton() {
 }
 
 function DocumentList({
-  resources,
+  documents,
   onSelect,
 }: {
-  resources: Resource[];
-  onSelect: (resource: Resource) => void;
+  documents: Document[];
+  onSelect: (document: Document) => void;
 }) {
-  if (resources.length === 0) {
+  if (documents.length === 0) {
     return (
       <div className="flex flex-row items-center justify-center px-2 gap-4">
         <FileIcon className="w-8 h-8 text-gray-500" />
         <p className="text-gray-500 text-sm mt-2">
-          Drag and drop files into the chat to add them as resources.
+          Drag and drop files into the chat to add them as documents.
         </p>
       </div>
     );
@@ -81,8 +81,8 @@ function DocumentList({
 
   return (
     <div className="flex flex-col gap-2 w-full px-4">
-      {resources.map((resource, index) => (
-        <DocumentItem key={index} resource={resource} onSelect={onSelect} />
+      {documents.map((document, index) => (
+        <DocumentItem key={index} document={document} onSelect={onSelect} />
       ))}
     </div>
   );
@@ -98,23 +98,23 @@ function DocumentListSkeleton() {
   );
 }
 
-function Documents({ resource }: { resource: Resource }) {
+function Documents({ document }: { document: Document }) {
   const rendered = useMemo(() => {
-    switch (resource.fileType) {
+    switch (document.fileType) {
       case "text/plain":
-        return <p className="whitespace-pre-wrap">{resource.content}</p>;
+        return <p className="whitespace-pre-wrap">{document.content}</p>;
       case "text/markdown":
-        return <Markdown content={resource.content} />;
+        return <Markdown content={document.content} />;
       case "application/json":
         return (
           <div className="bg-gray-100 p-2 rounded-md">
-            <code className="whitespace-pre-wrap">{resource.content}</code>
+            <code className="whitespace-pre-wrap">{document.content}</code>
           </div>
         );
       default:
-        return <p className="whitespace-pre-wrap">{resource.content}</p>;
+        return <p className="whitespace-pre-wrap">{document.content}</p>;
     }
-  }, [resource.content, resource.fileType]);
+  }, [document.content, document.fileType]);
   return (
     <ScrollArea className="h-[calc(100vh-6rem)]">
       <div className="px-4 pb-4">{rendered}</div>
@@ -123,13 +123,13 @@ function Documents({ resource }: { resource: Resource }) {
 }
 
 function DocumentHeader({
-  resource,
+  document,
   onClose,
 }: {
-  resource: Resource | null;
+  document: Document | null;
   onClose: () => void;
 }) {
-  if (!resource) {
+  if (!document) {
     return (
       <div className="sticky flex flex-col justify-between gap-2">
         <div className="pb-6 top-0 p-4 flex items-center">
@@ -137,8 +137,8 @@ function DocumentHeader({
         </div>
         <div className="flex justify-between items-center px-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">Contents</h2>
-            <ContentUploader />
+            <h2 className="text-lg font-semibold">Documents</h2>
+            <DocumentUploader />
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ function DocumentHeader({
     <>
       <div className="flex gap-2 flex-row w-full px-4 pt-4">
         <div className="flex-1 flex items-center overflow-hidden">
-          <h2 className="text-lg font-semibold truncate">{resource.title}</h2>
+          <h2 className="text-lg font-semibold truncate">{document.title}</h2>
         </div>
         <Button
           variant="ghost"
@@ -165,12 +165,16 @@ function DocumentHeader({
 }
 
 export function DocumentPanel() {
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
   const isMobile = useMediaQuery("(max-width: 1400px)");
-  const { panelState, setPanelState, resources, isUploadingContent } =
-    useChatContext();
+  const {
+    panelState,
+    setPanelState,
+    documents,
+    isUploadingDocuments: isUploadingContent,
+  } = useChatContext();
 
   const panelWidth = isMobile
     ? "100%"
@@ -178,14 +182,14 @@ export function DocumentPanel() {
       ? "700px"
       : "300px";
 
-  function setResource(resource: Resource) {
-    setSelectedResource(resource);
+  function setDocument(document: Document) {
+    setSelectedDocument(document);
     setPanelState("detail");
   }
 
   const handleClose = () => {
-    if (selectedResource) {
-      setSelectedResource(null);
+    if (selectedDocument) {
+      setSelectedDocument(null);
       setPanelState("list");
     } else {
       setPanelState("closed");
@@ -204,15 +208,15 @@ export function DocumentPanel() {
         style={{ width: panelWidth }}
       >
         <div className="flex flex-col gap-4">
-          <DocumentHeader resource={selectedResource} onClose={handleClose} />
+          <DocumentHeader document={selectedDocument} onClose={handleClose} />
           <div className="overflow-hidden">
             <div className="w-full overflow-y-auto h-full">
               {isUploadingContent ? (
                 <DocumentListSkeleton />
-              ) : selectedResource ? (
-                <Documents resource={selectedResource} />
+              ) : selectedDocument ? (
+                <Documents document={selectedDocument} />
               ) : (
-                <DocumentList resources={resources} onSelect={setResource} />
+                <DocumentList documents={documents} onSelect={setDocument} />
               )}
             </div>
           </div>

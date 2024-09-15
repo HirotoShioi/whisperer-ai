@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
 export function ChatInput() {
-  const { chatHook, onSubmit, setIsContentUploaderOpen } = useChatContext();
+  const {
+    chatHook,
+    onSubmit,
+    setIsDocumentUploaderOpen: setIsContentUploaderOpen,
+  } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

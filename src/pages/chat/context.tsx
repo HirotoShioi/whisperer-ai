@@ -7,14 +7,14 @@ import React, {
 } from "react";
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/use-chat";
-import { Resource } from "@/lib/database/schema";
+import { Document } from "@/lib/database/schema";
 import { useNavigate, useRevalidator } from "react-router-dom";
 import { useAlert } from "@/components/alert";
 import {
   loadFromLocalStorage,
   deleteFromLocalStorage,
 } from "@/utils/local-storage";
-import { createResource } from "@/services/resources";
+import { saveDocument } from "@/services/documents";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
 import { saveMessage } from "@/services/messages";
@@ -31,16 +31,16 @@ interface ChatContextType {
   chatHook: ReturnType<typeof useChat>;
   panelState: PanelState;
   setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
-  resources: Resource[];
+  documents: Document[];
   uploadFiles: (acceptedFiles: File[]) => Promise<void>;
   uploadText: (text: string) => Promise<void>;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   scrollRef: (element: HTMLDivElement | null) => void;
   scrollToEnd: () => void;
-  isContentUploaderOpen: boolean;
-  setIsContentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isUploadingContent: boolean;
-  setIsUploadingContent: React.Dispatch<React.SetStateAction<boolean>>;
+  isDocumentUploaderOpen: boolean;
+  setIsDocumentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isUploadingDocuments: boolean;
+  setIsUploadingDocuments: React.Dispatch<React.SetStateAction<boolean>>;
   thread: Thread;
 }
 
@@ -49,14 +49,14 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatContextProvider: React.FC<{
   children: React.ReactNode;
   initialMessages: Message[];
-  initialResources: Resource[];
+  initialDocuments: Document[];
   thread: Thread;
-}> = ({ children, initialMessages, initialResources, thread }) => {
+}> = ({ children, initialMessages, initialDocuments, thread }) => {
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
-  const [isUploadingContent, setIsUploadingContent] = useState(false);
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const navigate = useNavigate();
-  const [isContentUploaderOpen, setIsContentUploaderOpen] = useState(false);
+  const [isDocumentUploaderOpen, setIsDocumentUploaderOpen] = useState(false);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
   const chatHook = useChat(thread.id, initialMessages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
@@ -104,8 +104,8 @@ export const ChatContextProvider: React.FC<{
 
   const uploadFiles = useCallback(
     async (acceptedFiles: File[]) => {
-      setIsUploadingContent(true);
-      setIsContentUploaderOpen(false);
+      setIsUploadingDocuments(true);
+      setIsDocumentUploaderOpen(false);
       if (acceptedFiles.length <= 0) {
         return;
       }
@@ -127,7 +127,7 @@ export const ChatContextProvider: React.FC<{
         const fileWithText = await Promise.all(
           acceptedFiles.map(async (file) => {
             const { content, fileType } = await parseFile(file, file.type);
-            await createResource({
+            await saveDocument({
               threadId: thread.id,
               content,
               title: file.name,
@@ -146,7 +146,7 @@ export const ChatContextProvider: React.FC<{
           toolInvocations: fileWithText.map(({ text, file }) => ({
             state: "result" as const,
             toolCallId: nanoid(),
-            toolName: "addResource",
+            toolName: "saveDocument",
             args: {},
             result: {
               success: true,
@@ -165,7 +165,7 @@ export const ChatContextProvider: React.FC<{
         revalidate();
         scrollToEnd();
       } finally {
-        setIsUploadingContent(false);
+        setIsUploadingDocuments(false);
       }
     },
     [chatHook, revalidate, openAlert, thread.id, scrollToEnd]
@@ -173,8 +173,8 @@ export const ChatContextProvider: React.FC<{
 
   const uploadText = useCallback(
     async (text: string) => {
-      setIsUploadingContent(true);
-      setIsContentUploaderOpen(false);
+      setIsUploadingDocuments(true);
+      setIsDocumentUploaderOpen(false);
       try {
         const markdown = await convertTextToMarkdown(text);
         const file = new File([markdown.content], markdown.title, {
@@ -182,7 +182,7 @@ export const ChatContextProvider: React.FC<{
         });
         await uploadFiles([file]);
       } finally {
-        setIsUploadingContent(false);
+        setIsUploadingDocuments(false);
       }
     },
     [uploadFiles]
@@ -205,16 +205,16 @@ export const ChatContextProvider: React.FC<{
         chatHook,
         panelState,
         setPanelState,
-        resources: initialResources,
+        documents: initialDocuments,
         uploadFiles,
         uploadText,
         onSubmit,
         scrollRef,
         scrollToEnd,
-        isContentUploaderOpen,
-        setIsContentUploaderOpen,
-        isUploadingContent,
-        setIsUploadingContent,
+        isDocumentUploaderOpen,
+        setIsDocumentUploaderOpen,
+        isUploadingDocuments,
+        setIsUploadingDocuments,
         thread,
       }}
     >

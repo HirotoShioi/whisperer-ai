@@ -8,15 +8,14 @@ import {
 } from "react-router-dom";
 import { doesThreadExist, getThreadById } from "@/services/threads";
 import { useEffect } from "react";
-import { deleteResourceById, getResources } from "@/services/resources";
-import { Resource } from "@/lib/database/schema";
+import { deleteDocumentById, getDocumentsById } from "@/services/documents";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
-import { DocumentPanel } from "./content-panel";
+import { DocumentPanel } from "./document-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import { Thread } from "@/lib/database/schema";
+import type { Thread, Document } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -25,9 +24,9 @@ export async function action({ request }: ActionFunctionArgs) {
     case "POST":
       return Response.json({ success: true });
     case "DELETE": {
-      const resourceId = formData.get("resourceId");
-      if (typeof resourceId === "string") {
-        await deleteResourceById(resourceId);
+      const documentId = formData.get("documentId");
+      if (typeof documentId === "string") {
+        await deleteDocumentById(documentId);
       }
       return Response.json({ success: true });
     }
@@ -44,15 +43,15 @@ export async function loader(params: LoaderFunctionArgs) {
   if (!exists) {
     return redirect(`/`);
   }
-  const [messages, resources, thread] = await Promise.all([
+  const [messages, documents, thread] = await Promise.all([
     getMessages(threadId),
-    getResources(threadId),
+    getDocumentsById(threadId),
     getThreadById(threadId),
   ]);
-  return { messages, resources, thread };
+  return { messages, documents, thread };
 }
 
-const Content = React.memo(DocumentPanel);
+const Document = React.memo(DocumentPanel);
 
 function ChatContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -72,7 +71,7 @@ function ChatPageContent() {
 
   return (
     <div className="flex flex-row h-screen">
-      {!isSmallScreen && <Content />}
+      {!isSmallScreen && <Document />}
       <div className="w-full h-full flex flex-col">
         <ChatTitle thread={thread} />
         <div className="flex-grow overflow-hidden flex flex-col">
@@ -99,18 +98,18 @@ function ChatPageContent() {
 export default function ChatPage() {
   const {
     messages: initialMessages,
-    resources: initialResources,
+    documents: initialDocuments,
     thread,
   } = useLoaderData() as {
     messages: Message[];
-    resources: Resource[];
+    documents: Document[];
     thread: Thread;
   };
 
   return (
     <ChatContextProvider
       initialMessages={initialMessages}
-      initialResources={initialResources}
+      initialDocuments={initialDocuments}
       thread={thread}
     >
       <ChatPageContent />

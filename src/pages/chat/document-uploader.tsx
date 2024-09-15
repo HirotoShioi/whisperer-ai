@@ -15,12 +15,12 @@ import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
 
-export default function ContentUploader() {
+export default function DocumentUploader() {
   const {
     uploadFiles,
     uploadText,
-    isContentUploaderOpen,
-    setIsContentUploaderOpen,
+    isDocumentUploaderOpen: isContentUploaderOpen,
+    setIsDocumentUploaderOpen: setIsContentUploaderOpen,
   } = useChatContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -55,10 +55,10 @@ export default function ContentUploader() {
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add Content</DialogTitle>
+          <DialogTitle className="text-2xl">Add Documents</DialogTitle>
           <DialogDescription className="text-lg">
-            Add content to the conversation. This content will help answer
-            questions about the content.
+            Add documents to the conversation. This documents will help answer
+            questions about the documents provided.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
