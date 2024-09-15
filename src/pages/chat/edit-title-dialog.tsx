@@ -11,7 +11,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Pencil } from "lucide-react";
-import { renameThread } from "@/data/threads";
+import { renameThread } from "@/services/threads";
 import { useRevalidator } from "react-router-dom";
 
 export interface EditTitleDialogProps {

@@ -1,22 +1,22 @@
 import { Message } from "ai/react";
-import { getMessages } from "@/data/messages";
+import { getMessages } from "@/services/messages";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   redirect,
   useLoaderData,
 } from "react-router-dom";
-import { doesThreadExist, getThreadById } from "@/data/threads";
+import { doesThreadExist, getThreadById } from "@/services/threads";
 import { useEffect } from "react";
-import { deleteResourceById, getResources } from "@/data/resources";
-import { Resource } from "@/lib/db/schema/resources";
+import { deleteResourceById, getResources } from "@/services/resources";
+import { Resource } from "@/lib/database/schema";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { ContentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import { Thread } from "@/lib/db/schema/thread";
+import { Thread } from "@/lib/database/schema";
 import { EditTitleDialog } from "./edit-title-dialog";
 
 export async function action({ request }: ActionFunctionArgs) {

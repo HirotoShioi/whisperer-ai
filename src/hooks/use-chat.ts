@@ -1,6 +1,6 @@
 import { useChat as c } from "ai/react";
 import { convertToCoreMessages, Message, streamText, tool } from "ai";
-import { saveMessage } from "@/data/messages";
+import { saveMessage } from "@/services/messages";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { findRelevantContent } from "@/lib/ai/embeddings";

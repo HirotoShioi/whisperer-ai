@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createThread, getThreads, newThreadId } from "@/data/threads";
+import { createThread, getThreads, newThreadId } from "@/services/threads";
 import { defer, useLoaderData, useNavigate } from "react-router-dom";
-import { Thread } from "@/lib/db/schema/thread";
+import { Thread } from "@/lib/database/schema";
 import { Link } from "react-router-dom";
 import {
   loadFromLocalStorage,
@@ -12,8 +12,6 @@ import {
 import { useRef } from "react";
 import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
-import { applyMigrations } from "@/lib/db/migration";
-import React, { useState, useEffect } from "react";
 import { BASE_CHAT_MODEL } from "@/constants";
 
 function getGreeting(): string {
@@ -31,7 +29,6 @@ export async function loader() {
   const threads = await getThreads().catch(() => []);
   return defer({
     threads,
-    migrations: applyMigrations().then(() => null),
   });
 }
 
@@ -53,16 +50,8 @@ function ThreadItem({ thread }: { thread: Thread }) {
 function NewChatForm() {
   const navigate = useNavigate();
   const { openAlert } = useAlert();
-  const { migrations } = useLoaderData() as { migrations: Promise<void> };
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    migrations.then(() => {
-      setIsLoading(false);
-    });
-  }, [migrations]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -111,7 +100,6 @@ function NewChatForm() {
               <Button
                 type="submit"
                 className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
-                disabled={isLoading}
               >
                 <PenSquareIcon className="h-4 w-4" />
                 <span className="sr-only">Send</span>

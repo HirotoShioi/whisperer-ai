@@ -1,5 +1,5 @@
-import { db } from "@/providers/pglite";
-import { threads } from "@/lib/db/schema/thread";
+import { getDB } from "@/lib/database/client";
+import { schema } from "@/lib/database/schema";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -10,29 +10,39 @@ export const createThread = async (
   newThreadId: string,
   title: string = "New Conversation"
 ) => {
+  const db = await getDB();
   const [thread] = await db
-    .insert(threads)
+    .insert(schema.threads)
     .values({ id: newThreadId, title: title })
     .returning();
   return thread;
 };
 
 export const renameThread = async (id: string, title: string) => {
+  const db = await getDB();
   const [thread] = await db
-    .update(threads)
+    .update(schema.threads)
     .set({ title })
-    .where(eq(threads.id, id))
+    .where(eq(schema.threads.id, id))
     .returning();
   return thread;
 };
 
 export const getThreadById = async (id: string) => {
-  const [thread] = await db.select().from(threads).where(eq(threads.id, id));
+  const db = await getDB();
+  const [thread] = await db
+    .select()
+    .from(schema.threads)
+    .where(eq(schema.threads.id, id));
   return thread;
 };
 
 export const getThreads = async () => {
-  return db.select().from(threads).orderBy(desc(threads.createdAt));
+  const db = await getDB();
+  return db
+    .select()
+    .from(schema.threads)
+    .orderBy(desc(schema.threads.createdAt));
 };
 
 export const doesThreadExist = async (id: string) => {
@@ -41,5 +51,6 @@ export const doesThreadExist = async (id: string) => {
 };
 // deleteすると関連するmessages, resourcesも削除される
 export const deleteThread = async (id: string) => {
-  return db.delete(threads).where(eq(threads.id, id));
+  const db = await getDB();
+  return db.delete(schema.threads).where(eq(schema.threads.id, id));
 };

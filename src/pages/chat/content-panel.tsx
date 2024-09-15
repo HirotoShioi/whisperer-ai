@@ -1,6 +1,6 @@
 import { XIcon, FileIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Resource } from "@/lib/db/schema/resources";
+import { Resource } from "@/lib/database/schema";
 import { useFetcher } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";

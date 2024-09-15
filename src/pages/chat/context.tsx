@@ -7,22 +7,22 @@ import React, {
 } from "react";
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/use-chat";
-import { Resource } from "@/lib/db/schema/resources";
+import { Resource } from "@/lib/database/schema";
 import { useNavigate, useRevalidator } from "react-router-dom";
 import { useAlert } from "@/components/alert";
 import {
   loadFromLocalStorage,
   deleteFromLocalStorage,
 } from "@/utils/local-storage";
-import { createResource } from "@/data/resources";
+import { createResource } from "@/services/resources";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
-import { saveMessage } from "@/data/messages";
+import { saveMessage } from "@/services/messages";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
-import { Thread } from "@/lib/db/schema/thread";
-import { renameThread } from "@/data/threads";
+import { Thread } from "@/lib/database/schema";
+import { renameThread } from "@/services/threads";
 import { nameConversation } from "@/lib/ai/name-conversation";
 
 export type PanelState = "closed" | "list" | "detail";

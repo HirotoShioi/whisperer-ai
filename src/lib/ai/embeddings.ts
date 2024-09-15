@@ -1,9 +1,9 @@
 import { embed, embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { embeddings } from "../db/schema/embeddings";
+import { schema } from "@/lib/database/schema";
 import { cosineDistance, sql, gt, desc, eq, and } from "drizzle-orm";
-import { db } from "@/providers/pglite";
 import { SIMILARITY_THRESHOLD, VECTOR_SEARCH_K } from "@/constants";
+import { getDB } from "../database/client";
 
 const embeddingModel = createOpenAI({
   apiKey: "DUMMY_API_KEY",
@@ -50,22 +50,23 @@ export const findRelevantContent = async (
   userQuery: string,
   threadId: string
 ) => {
+  const db = await getDB();
   const userQueryEmbedded = await generateEmbedding(userQuery);
   const similarity = sql<number>`1 - (${cosineDistance(
-    embeddings.embedding,
+    schema.embeddings.embedding,
     userQueryEmbedded.embedding
   )})`;
   const similarGuides = await db
     .select({
-      name: embeddings.content,
+      name: schema.embeddings.content,
       similarity,
-      embeddingId: embeddings.id,
+      embeddingId: schema.embeddings.id,
     })
-    .from(embeddings)
+    .from(schema.embeddings)
     .where(
       and(
         gt(similarity, SIMILARITY_THRESHOLD),
-        eq(embeddings.threadId, threadId)
+        eq(schema.embeddings.threadId, threadId)
       )
     )
     .orderBy((t) => desc(t.similarity))

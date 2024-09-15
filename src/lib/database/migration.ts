@@ -2,7 +2,8 @@
 import { bigint, pgTable, serial, text } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { count, eq, sql } from "drizzle-orm";
-import { pglite } from "@/providers/pglite";
+import { PGliteWorker } from "@electric-sql/pglite/worker";
+
 const createDrizzleMigrationsTable = sql`
 CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -17,7 +18,7 @@ const drizzleMigrations = pgTable("__drizzle_migrations", {
   timestamp: bigint("timestamp", { mode: "number" }).notNull(),
 });
 
-const migrations = [
+export const migrations = [
   "CREATE EXTENSION IF NOT EXISTS vector;",
   `CREATE TABLE IF NOT EXISTS "resources" (
     "id" varchar(191) PRIMARY KEY NOT NULL,
@@ -67,8 +68,8 @@ async function createHash(str: string) {
   return hashHex;
 }
 
-export async function applyMigrations() {
-  const db = drizzle(pglite);
+export async function applyMigrations(pglite: PGliteWorker) {
+  const db = drizzle(pglite as any);
   await db.execute(createDrizzleMigrationsTable);
   const [migrationCount] = await db
     .select({ value: count() })
