@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Dropdown from "@/components/dropdown";
 import { cn } from "@/lib/utils";
 
-function ResourceItem({
+function DocumentItem({
   resource,
   onSelect,
 }: {
@@ -51,7 +51,7 @@ function ResourceItem({
   );
 }
 
-function ResourceItemSkeleton() {
+function DocumentItemSkeleton() {
   return (
     <div className="flex items-center p-2 bg-white rounded-lg shadow-md border w-full">
       <Skeleton className="w-10 h-10 rounded-lg mr-3" />
@@ -61,7 +61,7 @@ function ResourceItemSkeleton() {
   );
 }
 
-function ResourceList({
+function DocumentList({
   resources,
   onSelect,
 }: {
@@ -82,23 +82,23 @@ function ResourceList({
   return (
     <div className="flex flex-col gap-2 w-full px-4">
       {resources.map((resource, index) => (
-        <ResourceItem key={index} resource={resource} onSelect={onSelect} />
+        <DocumentItem key={index} resource={resource} onSelect={onSelect} />
       ))}
     </div>
   );
 }
 
-function ResourceListSkeleton() {
+function DocumentListSkeleton() {
   return (
     <div className="flex flex-col gap-2 w-full px-4">
       {[...Array(5)].map((_, index) => (
-        <ResourceItemSkeleton key={index} />
+        <DocumentItemSkeleton key={index} />
       ))}
     </div>
   );
 }
 
-function ResourceContent({ resource }: { resource: Resource }) {
+function Documents({ resource }: { resource: Resource }) {
   const rendered = useMemo(() => {
     switch (resource.fileType) {
       case "text/plain":
@@ -122,7 +122,7 @@ function ResourceContent({ resource }: { resource: Resource }) {
   );
 }
 
-function ResourceHeader({
+function DocumentHeader({
   resource,
   onClose,
 }: {
@@ -164,7 +164,7 @@ function ResourceHeader({
   );
 }
 
-export function ContentPanel() {
+export function DocumentPanel() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
@@ -204,15 +204,15 @@ export function ContentPanel() {
         style={{ width: panelWidth }}
       >
         <div className="flex flex-col gap-4">
-          <ResourceHeader resource={selectedResource} onClose={handleClose} />
+          <DocumentHeader resource={selectedResource} onClose={handleClose} />
           <div className="overflow-hidden">
             <div className="w-full overflow-y-auto h-full">
               {isUploadingContent ? (
-                <ResourceListSkeleton />
+                <DocumentListSkeleton />
               ) : selectedResource ? (
-                <ResourceContent resource={selectedResource} />
+                <Documents resource={selectedResource} />
               ) : (
-                <ResourceList resources={resources} onSelect={setResource} />
+                <DocumentList resources={resources} onSelect={setResource} />
               )}
             </div>
           </div>

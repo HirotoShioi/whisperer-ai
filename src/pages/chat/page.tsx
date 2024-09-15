@@ -12,12 +12,12 @@ import { deleteResourceById, getResources } from "@/services/resources";
 import { Resource } from "@/lib/database/schema";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
-import { ContentPanel } from "./content-panel";
+import { DocumentPanel } from "./content-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 import { Thread } from "@/lib/database/schema";
-import { EditTitleDialog } from "./edit-title-dialog";
+import { ChatTitle } from "./chat-title";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -52,7 +52,7 @@ export async function loader(params: LoaderFunctionArgs) {
   return { messages, resources, thread };
 }
 
-const Content = React.memo(ContentPanel);
+const Content = React.memo(DocumentPanel);
 
 function ChatContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -74,10 +74,7 @@ function ChatPageContent() {
     <div className="flex flex-row h-screen">
       {!isSmallScreen && <Content />}
       <div className="w-full h-full flex flex-col">
-        <header className="p-4 flex flex-row gap-2 items-center text-gray-600">
-          <h1 className="text-xl">{thread.title}</h1>
-          <EditTitleDialog title={thread.title} threadId={thread.id} />
-        </header>
+        <ChatTitle thread={thread} />
         <div className="flex-grow overflow-hidden flex flex-col">
           <div className="flex-grow overflow-y-auto" ref={scrollRef}>
             <div className="mx-auto">
