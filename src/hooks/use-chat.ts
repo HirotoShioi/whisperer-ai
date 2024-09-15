@@ -5,6 +5,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { findRelevantContent } from "@/lib/ai/embeddings";
 import { BASE_CHAT_MODEL } from "@/constants";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export function useChat(threadId: string, initialMessages?: Message[]) {
   const chat = c({
@@ -46,9 +47,13 @@ async function handleChat(req: Request) {
   if (!body || !threadId) {
     return Response.json({ error: "No body" }, { status: 404 });
   }
+  const session = await fetchAuthSession();
+  if (!session.tokens?.idToken) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { messages } = body as { messages: any[] };
   const model = createOpenAI({
-    apiKey: "DUMMY_API_KEY",
+    apiKey: session.tokens.idToken.toString(),
     baseURL: import.meta.env.VITE_API_URL,
   }).chat(BASE_CHAT_MODEL);
   const result = await streamText({

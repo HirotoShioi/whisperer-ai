@@ -4,11 +4,18 @@ import { schema } from "@/lib/database/schema";
 import { cosineDistance, sql, gt, desc, eq, and } from "drizzle-orm";
 import { SIMILARITY_THRESHOLD, VECTOR_SEARCH_K } from "@/constants";
 import { getDB } from "../database/client";
+import { fetchAuthSession } from "aws-amplify/auth";
 
-const embeddingModel = createOpenAI({
-  apiKey: "DUMMY_API_KEY",
-  baseURL: import.meta.env.VITE_API_URL,
-}).embedding("text-embedding-3-small");
+async function getEmbeddingModel() {
+  const session = await fetchAuthSession();
+  if (!session.tokens?.idToken) {
+    throw new Error("No session");
+  }
+  return createOpenAI({
+    apiKey: session.tokens.idToken.toString(),
+    baseURL: import.meta.env.VITE_API_URL,
+  }).embedding("text-embedding-3-small");
+}
 
 /**
  * Generates embeddings for a list of documents.
@@ -19,7 +26,7 @@ export const generateEmbeddings = async (
   documents: string[]
 ): Promise<{ embeddings: number[]; content: string }[]> => {
   const { embeddings } = await embedMany({
-    model: embeddingModel,
+    model: await getEmbeddingModel(),
     values: documents,
   });
   return embeddings.map((e, i) => ({ embeddings: e, content: documents[i] }));
@@ -34,7 +41,7 @@ export const generateEmbedding = async (
   document: string
 ): Promise<{ embedding: number[]; content: string }> => {
   const { embedding } = await embed({
-    model: embeddingModel,
+    model: await getEmbeddingModel(),
     value: document,
   });
   return { embedding, content: document };

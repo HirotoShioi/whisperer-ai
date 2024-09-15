@@ -77,22 +77,6 @@ export const ChatContextProvider: React.FC<{
     });
   }
   useEffect(() => {
-    const apiKey = loadFromLocalStorage("openAIAPIKey");
-    if (!apiKey) {
-      openAlert({
-        title: "OpenAI API Key is not set",
-        description: "Please set the OpenAI API Key",
-        actions: [
-          {
-            label: "OK",
-            onClick: () => {
-              navigate("/settings");
-            },
-          },
-        ],
-      });
-      return;
-    }
     const message = loadFromLocalStorage(thread.id);
     if (message && initialMessages.length <= 0) {
       const parsedMessage = JSON.parse(message);

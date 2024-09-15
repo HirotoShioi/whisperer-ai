@@ -9,7 +9,7 @@ import { BASE_CHAT_MODEL } from "@/constants";
  * @returns The name of the conversation.
  */
 export async function nameConversation(message: string): Promise<string> {
-  const model = getModel({
+  const model = await getModel({
     model: BASE_CHAT_MODEL,
     temperature: 0.5,
   });

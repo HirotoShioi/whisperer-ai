@@ -25,10 +25,12 @@ export async function convertTextToMarkdown(
       title: "Document.md",
     };
   }
-  const model = getModel({
+  const model = await getModel({
     model: "gpt-4o-mini",
     temperature: 0,
-  }).withStructuredOutput(schema);
+  });
+
+  const withStructuredOutput = model.withStructuredOutput(schema);
 
   const template = PromptTemplate.fromTemplate(
     `Please convert the following text into readable Markdown format, using appropriate headings, lists, emphasis, and other formatting. If a table is more suitable than a list, please use a table.
@@ -38,6 +40,6 @@ export async function convertTextToMarkdown(
     {text}
     *** END OF TEXT ***`
   );
-  const chain = template.pipe(model);
+  const chain = template.pipe(withStructuredOutput);
   return chain.invoke({ text });
 }
