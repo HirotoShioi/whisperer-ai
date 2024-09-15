@@ -5,14 +5,12 @@ import { createThread, getThreads, newThreadId } from "@/services/threads";
 import { defer, useLoaderData, useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import { Link } from "react-router-dom";
-import {
-  loadFromLocalStorage,
-  saveToLocalStorage,
-} from "@/utils/local-storage";
+import { saveToLocalStorage } from "@/utils/local-storage";
 import { useRef } from "react";
 import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { BASE_CHAT_MODEL } from "@/constants";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -52,19 +50,18 @@ function NewChatForm() {
   const { openAlert } = useAlert();
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
-
+  const { user } = useAuthenticator((context) => [context.user]);
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const apiKey = loadFromLocalStorage("openAIAPIKey");
-    if (!apiKey) {
+    if (!user) {
       openAlert({
-        title: "OpenAI API Key is not set",
-        description: "Please set the OpenAI API Key",
+        title: "Please sign in",
+        description: "Please sign in to use the chat",
         actions: [
           {
-            label: "OK",
+            label: "Sign in",
             onClick: () => {
-              navigate("/settings");
+              navigate("/sign-in");
             },
           },
         ],

@@ -1,4 +1,8 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  redirect,
+  RouterProvider,
+} from "react-router-dom";
 import ErrorPage from "@/pages/error-page";
 import Root from "@/routes/root";
 import Providers from "@/providers/providers";
@@ -9,6 +13,17 @@ import ChatPage, {
 } from "./pages/chat/page";
 import SettingsPage from "./pages/settings-page";
 import IndexPage, { loader as indexLoader } from "./pages/index/page";
+import Callback from "./pages/callback";
+import SignInPage from "./pages/sign-in";
+import { fetchAuthSession } from "aws-amplify/auth";
+
+async function redirectIfAuthenticated() {
+  const session = await fetchAuthSession();
+  if (session.credentials) {
+    return redirect("/");
+  }
+  return null;
+}
 
 const router = createBrowserRouter([
   {
@@ -34,6 +49,15 @@ const router = createBrowserRouter([
           {
             path: "/settings",
             element: <SettingsPage />,
+          },
+          {
+            path: "/sign-in",
+            element: <SignInPage />,
+            loader: redirectIfAuthenticated,
+          },
+          {
+            path: "/callback",
+            element: <Callback />,
           },
           { path: "*", element: <NotFoundPage /> },
         ],
