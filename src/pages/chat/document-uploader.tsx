@@ -53,16 +53,14 @@ export default function DocumentUploader() {
       open={isDocumentUploaderOpen}
       onOpenChange={setIsDocumentUploaderOpen}
     >
-      <DialogTrigger asChild className="focus:outline-none">
-        <UsageTooltip usage={usage}>
-          <CirclePlus
-            size={20}
-            className={cn(
-              "focus:outline-none cursor-pointer",
-              usage.isZero ? "opacity-50 cursor-not-allowed" : ""
-            )}
-          />
-        </UsageTooltip>
+      <DialogTrigger className="focus:outline-none" disabled={usage.isZero}>
+        <CirclePlus
+          size={20}
+          className={cn(
+            "focus:outline-none cursor-pointer",
+            usage.isZero ? "opacity-50 cursor-not-allowed" : ""
+          )}
+        />
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>
@@ -77,6 +75,7 @@ export default function DocumentUploader() {
             className="w-full h-80 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             ref={textAreaRef}
             placeholder="Enter the text you want to add as a source."
+            disabled={usage.isZero}
           />
           <div
             {...getRootProps()}
@@ -84,7 +83,7 @@ export default function DocumentUploader() {
               isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
             }`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} disabled={usage.isZero} />
             <p className="text-gray-500">
               {isDragActive
                 ? "Drop the files here"

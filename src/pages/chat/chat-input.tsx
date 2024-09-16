@@ -66,7 +66,7 @@ export function ChatInput() {
             style={{ minHeight: "20px" }}
             placeholder="Enter your message..."
             onChange={handleTextareaChange}
-            disabled={chatHook.isLoading}
+            disabled={chatHook.isLoading || usage.isZero}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
             id="chat-input"

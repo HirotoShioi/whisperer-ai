@@ -19,7 +19,7 @@ export class Usage {
 export async function getUsage(): Promise<Usage> {
   const session = await fetchAuthSession();
   if (!session.tokens?.idToken) {
-    throw new Error("No ID token found");
+    return new Usage(0, 100, 0);
   }
   const response = await fetch(`${import.meta.env.VITE_API_URL}/usage`, {
     headers: {

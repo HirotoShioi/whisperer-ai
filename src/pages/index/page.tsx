@@ -100,6 +100,7 @@ function NewChatForm() {
                 className="flex-grow mr-0 bg-white rounded-lg border-0 focus:outline-none focus:ring-0 p-2 resize-none"
                 placeholder="Type your message here..."
                 ref={input}
+                disabled={usage.isZero}
               />
               <UsageTooltip usage={usage}>
                 <Button
