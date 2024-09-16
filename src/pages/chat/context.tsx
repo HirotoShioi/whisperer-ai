@@ -19,12 +19,14 @@ import { Thread } from "@/lib/database/schema";
 import { renameThread } from "@/services/threads";
 import { nameConversation } from "@/lib/ai/name-conversation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { Usage } from "@/services/usage";
 
 export type PanelState = "closed" | "list" | "detail";
 
 interface ChatContextType {
   chatHook: ReturnType<typeof useChat>;
   panelState: PanelState;
+  usage: Usage;
   setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
   documents: Document[];
   uploadFiles: (acceptedFiles: File[]) => Promise<void>;
@@ -45,8 +47,9 @@ export const ChatContextProvider: React.FC<{
   children: React.ReactNode;
   initialMessages: Message[];
   initialDocuments: Document[];
+  usage: Usage;
   thread: Thread;
-}> = ({ children, initialMessages, initialDocuments, thread }) => {
+}> = ({ children, initialMessages, initialDocuments, usage, thread }) => {
   const { revalidate } = useRevalidator();
   const { openAlert } = useAlert();
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
@@ -214,6 +217,7 @@ export const ChatContextProvider: React.FC<{
         isUploadingDocuments,
         setIsUploadingDocuments,
         thread,
+        usage,
       }}
     >
       {children}

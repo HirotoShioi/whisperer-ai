@@ -19,8 +19,9 @@ export default function DocumentUploader() {
   const {
     uploadFiles,
     uploadText,
-    isDocumentUploaderOpen: isContentUploaderOpen,
-    setIsDocumentUploaderOpen: setIsContentUploaderOpen,
+    isDocumentUploaderOpen,
+    setIsDocumentUploaderOpen,
+    usage,
   } = useChatContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -47,10 +48,14 @@ export default function DocumentUploader() {
 
   return (
     <Dialog
-      open={isContentUploaderOpen}
-      onOpenChange={setIsContentUploaderOpen}
+      open={isDocumentUploaderOpen}
+      onOpenChange={setIsDocumentUploaderOpen}
     >
-      <DialogTrigger asChild className="focus:outline-none">
+      <DialogTrigger
+        asChild
+        className="focus:outline-none"
+        disabled={usage.isZero}
+      >
         <CirclePlus size={20} className="focus:outline-none cursor-pointer" />
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
@@ -82,7 +87,9 @@ export default function DocumentUploader() {
           </div>
         </div>
         <DialogFooter className="flex justify-end">
-          <Button onClick={handleSubmit}>Add</Button>
+          <Button onClick={handleSubmit} disabled={usage.isZero}>
+            Add
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

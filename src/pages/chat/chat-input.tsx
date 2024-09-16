@@ -6,6 +6,7 @@ export function ChatInput() {
   const {
     chatHook,
     onSubmit,
+    usage,
     setIsDocumentUploaderOpen: setIsContentUploaderOpen,
   } = useChatContext();
   const [isComposing, setIsComposing] = useState(false);
@@ -43,6 +44,7 @@ export function ChatInput() {
             className="mr-2 p-2 rounded-full"
             onClick={() => setIsContentUploaderOpen(true)}
             size="icon"
+            disabled={usage.isZero}
           >
             <FileIcon className="h-4 w-4" />
             <span className="sr-only">Upload a file</span>
@@ -69,6 +71,9 @@ export function ChatInput() {
               if (e.key === "Enter" && e.shiftKey) {
                 return;
               }
+              if (usage.isZero) {
+                return;
+              }
               if (e.key === "Enter" && !isComposing) {
                 e.preventDefault();
                 document.getElementById("chat-submit")?.click();
@@ -85,7 +90,9 @@ export function ChatInput() {
           <Button
             type="button"
             onClick={() => document.getElementById("chat-submit")?.click()}
-            disabled={chatHook.isLoading || chatHook.input.length <= 0}
+            disabled={
+              chatHook.isLoading || chatHook.input.length <= 0 || usage.isZero
+            }
             className="rounded-full p-2 w-10 h-10"
             size="icon"
           >

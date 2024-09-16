@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createThread, getThreads, newThreadId } from "@/services/threads";
-import { defer, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import { Link } from "react-router-dom";
 import { saveToLocalStorage } from "@/utils/local-storage";
@@ -11,6 +11,7 @@ import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
 import { BASE_CHAT_MODEL } from "@/constants";
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { getUsage, Usage } from "@/services/usage";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -24,10 +25,14 @@ function getGreeting(): string {
 }
 
 export async function loader() {
-  const threads = await getThreads().catch(() => []);
-  return defer({
+  const [threads, usage] = await Promise.all([
+    getThreads().catch(() => []),
+    getUsage(),
+  ]);
+  return {
     threads,
-  });
+    usage,
+  };
 }
 
 function ThreadItem({ thread }: { thread: Thread }) {
@@ -47,6 +52,7 @@ function ThreadItem({ thread }: { thread: Thread }) {
 
 function NewChatForm() {
   const navigate = useNavigate();
+  const { usage } = useLoaderData() as { usage: Usage };
   const { openAlert } = useAlert();
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
@@ -97,6 +103,7 @@ function NewChatForm() {
               <Button
                 type="submit"
                 className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
+                disabled={usage.isZero}
               >
                 <PenSquareIcon className="h-4 w-4" />
                 <span className="sr-only">Send</span>

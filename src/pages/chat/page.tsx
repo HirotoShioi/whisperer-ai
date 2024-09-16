@@ -17,6 +17,7 @@ import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 import type { Thread, Document } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
+import { getUsage, Usage } from "@/services/usage";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -43,12 +44,13 @@ export async function loader(params: LoaderFunctionArgs) {
   if (!exists) {
     return redirect(`/`);
   }
-  const [messages, documents, thread] = await Promise.all([
+  const [messages, documents, thread, usage] = await Promise.all([
     getMessages(threadId),
     getDocumentsById(threadId),
     getThreadById(threadId),
+    getUsage(),
   ]);
-  return { messages, documents, thread };
+  return { messages, documents, thread, usage };
 }
 
 const Document = React.memo(DocumentPanel);
@@ -100,14 +102,17 @@ export default function ChatPage() {
     messages: initialMessages,
     documents: initialDocuments,
     thread,
+    usage,
   } = useLoaderData() as {
     messages: Message[];
     documents: Document[];
     thread: Thread;
+    usage: Usage;
   };
 
   return (
     <ChatContextProvider
+      usage={usage}
       initialMessages={initialMessages}
       initialDocuments={initialDocuments}
       thread={thread}
