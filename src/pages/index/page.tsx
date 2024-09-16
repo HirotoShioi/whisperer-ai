@@ -1,19 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createThread, getThreads, newThreadId } from "@/data/threads";
-import { defer, useLoaderData, useNavigate } from "react-router-dom";
-import { Thread } from "@/lib/db/schema/thread";
+import { createThread, getThreads, newThreadId } from "@/services/threads";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { Thread } from "@/lib/database/schema";
 import { Link } from "react-router-dom";
-import {
-  loadFromLocalStorage,
-  saveToLocalStorage,
-} from "@/utils/local-storage";
+import { saveToLocalStorage } from "@/utils/local-storage";
 import { useRef } from "react";
 import Header from "@/components/header";
 import { useAlert } from "@/components/alert";
-import { applyMigrations } from "@/lib/db/migration";
-import React, { useState, useEffect } from "react";
+import { BASE_CHAT_MODEL } from "@/constants";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { getUsage, Usage } from "@/services/usage";
+import { UsageTooltip } from "@/components/usage-tooltip";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -27,11 +26,14 @@ function getGreeting(): string {
 }
 
 export async function loader() {
-  const threads = await getThreads().catch(() => []);
-  return defer({
+  const [threads, usage] = await Promise.all([
+    getThreads().catch(() => []),
+    getUsage(),
+  ]);
+  return {
     threads,
-    migrations: applyMigrations().then(() => null),
-  });
+    usage,
+  };
 }
 
 function ThreadItem({ thread }: { thread: Thread }) {
@@ -51,30 +53,22 @@ function ThreadItem({ thread }: { thread: Thread }) {
 
 function NewChatForm() {
   const navigate = useNavigate();
+  const { usage } = useLoaderData() as { usage: Usage };
   const { openAlert } = useAlert();
-  const { migrations } = useLoaderData() as { migrations: Promise<void> };
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    migrations.then(() => {
-      setIsLoading(false);
-    });
-  }, [migrations]);
-
+  const { user } = useAuthenticator((context) => [context.user]);
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const apiKey = loadFromLocalStorage("openAIAPIKey");
-    if (!apiKey) {
+    if (!user) {
       openAlert({
-        title: "OpenAI API Key is not set",
-        description: "Please set the OpenAI API Key",
+        title: "Please sign in",
+        description: "Please sign in to use the chat",
         actions: [
           {
-            label: "OK",
+            label: "Sign in",
             onClick: () => {
-              navigate("/settings");
+              navigate("/sign-in");
             },
           },
         ],
@@ -106,17 +100,22 @@ function NewChatForm() {
                 className="flex-grow mr-0 bg-white rounded-lg border-0 focus:outline-none focus:ring-0 p-2 resize-none"
                 placeholder="Type your message here..."
                 ref={input}
+                disabled={usage.isZero}
               />
-              <Button
-                type="submit"
-                className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
-                disabled={isLoading}
-              >
-                <PenSquareIcon className="h-4 w-4" />
-                <span className="sr-only">Send</span>
-              </Button>
+              <UsageTooltip usage={usage}>
+                <Button
+                  type="submit"
+                  className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
+                  disabled={usage.isZero}
+                >
+                  <PenSquareIcon className="h-4 w-4" />
+                  <span className="sr-only">Send</span>
+                </Button>
+              </UsageTooltip>
             </form>
-            <div className="text-sm text-gray-500">Model: gpt-4o-mini</div>
+            <div className="text-sm text-gray-500">
+              Model: {BASE_CHAT_MODEL}
+            </div>
           </div>
         </CardContent>
       </Card>

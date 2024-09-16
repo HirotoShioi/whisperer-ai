@@ -1,11 +1,12 @@
-import { NewMessageParams } from "@/lib/db/schema/messages";
-import { db } from "@/providers/pglite";
-import { messages } from "@/lib/db/schema/messages";
+import { getDB } from "@/lib/database/client";
+import { schema } from "@/lib/database/schema";
+import { NewMessageParams } from "@/lib/database/schema";
 import { eq } from "drizzle-orm";
 
 export async function saveMessage(input: NewMessageParams) {
+  const db = await getDB();
   return db
-    .insert(messages)
+    .insert(schema.messages)
     .values({
       role: input.role as "user" | "assistant" | "tool",
       content: input.content,
@@ -16,5 +17,9 @@ export async function saveMessage(input: NewMessageParams) {
 }
 
 export async function getMessages(threadId: string) {
-  return db.select().from(messages).where(eq(messages.threadId, threadId));
+  const db = await getDB();
+  return db
+    .select()
+    .from(schema.messages)
+    .where(eq(schema.messages.threadId, threadId));
 }

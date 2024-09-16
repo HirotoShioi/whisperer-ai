@@ -1,11 +1,7 @@
 import { generateEmbeddings } from "@/lib/ai/embeddings";
-import {
-  NewResourceParams,
-  insertResourceSchema,
-  resources,
-} from "@/lib/db/schema/resources";
-import { embeddings as embeddingsTable } from "@/lib/db/schema/embeddings";
-import { db } from "@/providers/pglite";
+import { insertDocumentSchema, NewDocumentParams } from "@/lib/database/schema";
+import { schema } from "@/lib/database/schema";
+import { getDB } from "@/lib/database/client";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { desc, eq } from "drizzle-orm";
 
@@ -18,13 +14,14 @@ async function generateChunks(input: string): Promise<string[]> {
   return chunks.map((chunk) => chunk.pageContent);
 }
 
-export const createResource = async (input: NewResourceParams) => {
+export const saveDocument = async (input: NewDocumentParams) => {
+  const db = await getDB();
   try {
     const { content, threadId, title, fileType } =
-      insertResourceSchema.parse(input);
+      insertDocumentSchema.parse(input);
     const chunks = await generateChunks(content);
-    const [resource] = await db
-      .insert(resources)
+    const [document] = await db
+      .insert(schema.documents)
       .values({
         content: content,
         threadId: threadId,
@@ -35,8 +32,8 @@ export const createResource = async (input: NewResourceParams) => {
     const embeddings = await generateEmbeddings(chunks);
     await Promise.all(
       embeddings.map(async ({ embeddings, content }) => {
-        await db.insert(embeddingsTable).values({
-          resourceId: resource.id,
+        await db.insert(schema.embeddings).values({
+          documentId: document.id,
           content: content,
           threadId: threadId,
           embedding: embeddings,
@@ -44,22 +41,26 @@ export const createResource = async (input: NewResourceParams) => {
       })
     );
 
-    return "Resource successfully created.";
+    return "Document successfully created.";
   } catch (e) {
     if (e instanceof Error)
       return e.message.length > 0 ? e.message : "Error, please try again.";
   }
 };
 
-export async function deleteResourceById(id: string) {
-  await db.delete(resources).where(eq(resources.id, id));
-  await db.delete(embeddingsTable).where(eq(embeddingsTable.resourceId, id));
+export async function deleteDocumentById(id: string) {
+  const db = await getDB();
+  await db.delete(schema.documents).where(eq(schema.documents.id, id));
+  await db
+    .delete(schema.embeddings)
+    .where(eq(schema.embeddings.documentId, id));
 }
 
-export const getResources = async (threadId: string) => {
+export const getDocumentsById = async (threadId: string) => {
+  const db = await getDB();
   return db
     .select()
-    .from(resources)
-    .where(eq(resources.threadId, threadId))
-    .orderBy(desc(resources.createdAt));
+    .from(schema.documents)
+    .where(eq(schema.documents.threadId, threadId))
+    .orderBy(desc(schema.documents.createdAt));
 };

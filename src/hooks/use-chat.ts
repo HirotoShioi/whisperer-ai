@@ -1,10 +1,11 @@
 import { useChat as c } from "ai/react";
 import { convertToCoreMessages, Message, streamText, tool } from "ai";
-import { saveMessage } from "@/data/messages";
-import { loadFromLocalStorage } from "@/utils/local-storage";
+import { saveMessage } from "@/services/messages";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { findRelevantContent } from "@/lib/ai/embeddings";
+import { BASE_CHAT_MODEL } from "@/constants";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export function useChat(threadId: string, initialMessages?: Message[]) {
   const chat = c({
@@ -46,15 +47,17 @@ async function handleChat(req: Request) {
   if (!body || !threadId) {
     return Response.json({ error: "No body" }, { status: 404 });
   }
-  const { messages } = body as { messages: any[] };
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    return Response.json({ error: "No API key" }, { status: 500 });
+  const session = await fetchAuthSession();
+  if (!session.tokens?.idToken) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { messages } = body as { messages: any[] };
+  const model = createOpenAI({
+    apiKey: session.tokens.idToken.toString(),
+    baseURL: import.meta.env.VITE_API_URL,
+  }).chat(BASE_CHAT_MODEL);
   const result = await streamText({
-    model: createOpenAI({
-      apiKey: apiKey,
-    }).chat("gpt-4o-mini"),
+    model: model,
     system: `You are a helpful assistant that can answer questions and help with tasks. You have access to a knowledge base that you can use to find relevant information. You can use the tools below to help you with your tasks.
       First, introduce yourself as a helpful assistant.
       Then, answer the user's question.
@@ -62,7 +65,7 @@ async function handleChat(req: Request) {
     messages: convertToCoreMessages(messages),
     tools: {
       getRelavantInformation: getRelavantInformationTool(threadId),
-      addResource: addResourceTool(threadId),
+      saveDocument: saveDocumentTool(threadId),
     },
   });
   return result.toDataStreamResponse();
@@ -95,13 +98,13 @@ function getRelavantInformationTool(threadId: string) {
   });
 }
 
-function addResourceTool(threadId: string) {
+function saveDocumentTool(threadId: string) {
   return tool({
-    description: "Add a resource to the knowledge base.",
+    description: "Add a document to the knowledge base.",
     parameters: z.object({
-      title: z.string().describe("The title of the resource."),
-      content: z.string().describe("The content of the resource."),
-      fileType: z.string().describe("The file type of the resource."),
+      title: z.string().describe("The title of the document."),
+      content: z.string().describe("The content of the document."),
+      fileType: z.string().describe("The file type of the document."),
     }),
     execute: async ({ title, content, fileType }) => {
       console.log(title, content, fileType, threadId);
@@ -109,4 +112,4 @@ function addResourceTool(threadId: string) {
   });
 }
 
-export type ToolNames = "getRelavantInformation" | "addResource";
+export type ToolNames = "getRelavantInformation" | "saveDocument";

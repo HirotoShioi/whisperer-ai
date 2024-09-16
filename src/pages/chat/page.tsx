@@ -1,23 +1,23 @@
 import { Message } from "ai/react";
-import { getMessages } from "@/data/messages";
+import { getMessages } from "@/services/messages";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   redirect,
   useLoaderData,
 } from "react-router-dom";
-import { doesThreadExist, getThreadById } from "@/data/threads";
+import { doesThreadExist, getThreadById } from "@/services/threads";
 import { useEffect } from "react";
-import { deleteResourceById, getResources } from "@/data/resources";
-import { Resource } from "@/lib/db/schema/resources";
+import { deleteDocumentById, getDocumentsById } from "@/services/documents";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
-import { ContentPanel } from "./content-panel";
+import { DocumentPanel } from "./document-panel";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import { Thread } from "@/lib/db/schema/thread";
-import { EditTitleDialog } from "./edit-title-dialog";
+import type { Thread, Document } from "@/lib/database/schema";
+import { ChatTitle } from "./chat-title";
+import { getUsage, Usage } from "@/services/usage";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -25,9 +25,9 @@ export async function action({ request }: ActionFunctionArgs) {
     case "POST":
       return Response.json({ success: true });
     case "DELETE": {
-      const resourceId = formData.get("resourceId");
-      if (typeof resourceId === "string") {
-        await deleteResourceById(resourceId);
+      const documentId = formData.get("documentId");
+      if (typeof documentId === "string") {
+        await deleteDocumentById(documentId);
       }
       return Response.json({ success: true });
     }
@@ -44,15 +44,16 @@ export async function loader(params: LoaderFunctionArgs) {
   if (!exists) {
     return redirect(`/`);
   }
-  const [messages, resources, thread] = await Promise.all([
+  const [messages, documents, thread, usage] = await Promise.all([
     getMessages(threadId),
-    getResources(threadId),
+    getDocumentsById(threadId),
     getThreadById(threadId),
+    getUsage(),
   ]);
-  return { messages, resources, thread };
+  return { messages, documents, thread, usage };
 }
 
-const Content = React.memo(ContentPanel);
+const Document = React.memo(DocumentPanel);
 
 function ChatContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -72,12 +73,9 @@ function ChatPageContent() {
 
   return (
     <div className="flex flex-row h-screen">
-      {!isSmallScreen && <Content />}
+      {!isSmallScreen && <Document />}
       <div className="w-full h-full flex flex-col">
-        <header className="p-4 flex flex-row gap-2 items-center text-gray-600">
-          <h1 className="text-xl">{thread.title}</h1>
-          <EditTitleDialog title={thread.title} threadId={thread.id} />
-        </header>
+        <ChatTitle thread={thread} />
         <div className="flex-grow overflow-hidden flex flex-col">
           <div className="flex-grow overflow-y-auto" ref={scrollRef}>
             <div className="mx-auto">
@@ -102,18 +100,21 @@ function ChatPageContent() {
 export default function ChatPage() {
   const {
     messages: initialMessages,
-    resources: initialResources,
+    documents: initialDocuments,
     thread,
+    usage,
   } = useLoaderData() as {
     messages: Message[];
-    resources: Resource[];
+    documents: Document[];
     thread: Thread;
+    usage: Usage;
   };
 
   return (
     <ChatContextProvider
+      usage={usage}
       initialMessages={initialMessages}
-      initialResources={initialResources}
+      initialDocuments={initialDocuments}
       thread={thread}
     >
       <ChatPageContent />

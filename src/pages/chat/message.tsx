@@ -13,8 +13,8 @@ function ToolMessage({ toolInvocation }: { toolInvocation: ToolInvocation }) {
     switch (toolInvocation.toolName as ToolNames) {
       case "getRelavantInformation":
         return "Searching information relevant to the conversation... ";
-      case "addResource":
-        return "Embedding Contents...";
+      case "saveDocument":
+        return "Embedding Documents...";
       default:
         return "Processing...";
     }

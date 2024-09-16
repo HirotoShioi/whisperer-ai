@@ -20,8 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // AlertDialogをインポート
-import { applyMigrations } from "@/lib/db/migration";
+} from "@/components/ui/alert-dialog";
 import { DB_NAME } from "@/constants";
 
 export default function SettingsPage() {
@@ -72,7 +71,6 @@ export default function SettingsPage() {
 
   async function handleDeleteDatabase() {
     indexedDB.deleteDatabase(`/pglite/${DB_NAME}`);
-    await applyMigrations();
     toast({
       variant: "success",
       title: "Database deleted",

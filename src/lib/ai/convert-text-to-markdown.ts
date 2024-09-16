@@ -1,8 +1,7 @@
-import { ChatOpenAI } from "@langchain/openai";
-import { loadFromLocalStorage } from "@/utils/local-storage";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { MAXIMUM_TEXT_LENGTH_FOR_MARKDOWN_CONVERSION } from "@/constants";
+import { getModel } from "./model";
 
 const schema = z.object({
   content: z.string().describe("The text to convert to markdown"),
@@ -26,15 +25,12 @@ export async function convertTextToMarkdown(
       title: "Document.md",
     };
   }
-  const apiKey = loadFromLocalStorage("openAIAPIKey");
-  if (!apiKey) {
-    throw new Error("OpenAI API key not found");
-  }
-  const model = new ChatOpenAI({
+  const model = await getModel({
     model: "gpt-4o-mini",
-    apiKey: apiKey,
     temperature: 0,
-  }).withStructuredOutput(schema);
+  });
+
+  const withStructuredOutput = model.withStructuredOutput(schema);
 
   const template = PromptTemplate.fromTemplate(
     `Please convert the following text into readable Markdown format, using appropriate headings, lists, emphasis, and other formatting. If a table is more suitable than a list, please use a table.
@@ -44,6 +40,6 @@ export async function convertTextToMarkdown(
     {text}
     *** END OF TEXT ***`
   );
-  const chain = template.pipe(model);
+  const chain = template.pipe(withStructuredOutput);
   return chain.invoke({ text });
 }

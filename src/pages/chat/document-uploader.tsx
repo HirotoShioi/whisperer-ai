@@ -14,13 +14,16 @@ import {
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
+import { UsageTooltip } from "@/components/usage-tooltip";
+import { cn } from "@/lib/utils";
 
-export default function ContentUploader() {
+export default function DocumentUploader() {
   const {
     uploadFiles,
     uploadText,
-    isContentUploaderOpen,
-    setIsContentUploaderOpen,
+    isDocumentUploaderOpen,
+    setIsDocumentUploaderOpen,
+    usage,
   } = useChatContext();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -47,18 +50,24 @@ export default function ContentUploader() {
 
   return (
     <Dialog
-      open={isContentUploaderOpen}
-      onOpenChange={setIsContentUploaderOpen}
+      open={isDocumentUploaderOpen}
+      onOpenChange={setIsDocumentUploaderOpen}
     >
-      <DialogTrigger asChild className="focus:outline-none">
-        <CirclePlus size={20} className="focus:outline-none cursor-pointer" />
+      <DialogTrigger className="focus:outline-none" disabled={usage.isZero}>
+        <CirclePlus
+          size={20}
+          className={cn(
+            "focus:outline-none cursor-pointer",
+            usage.isZero ? "opacity-50 cursor-not-allowed" : ""
+          )}
+        />
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add Content</DialogTitle>
+          <DialogTitle className="text-2xl">Add Documents</DialogTitle>
           <DialogDescription className="text-lg">
-            Add content to the conversation. This content will help answer
-            questions about the content.
+            Add documents to the conversation. This documents will help answer
+            questions about the documents provided.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
@@ -66,6 +75,7 @@ export default function ContentUploader() {
             className="w-full h-80 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             ref={textAreaRef}
             placeholder="Enter the text you want to add as a source."
+            disabled={usage.isZero}
           />
           <div
             {...getRootProps()}
@@ -73,7 +83,7 @@ export default function ContentUploader() {
               isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
             }`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} disabled={usage.isZero} />
             <p className="text-gray-500">
               {isDragActive
                 ? "Drop the files here"
@@ -82,7 +92,11 @@ export default function ContentUploader() {
           </div>
         </div>
         <DialogFooter className="flex justify-end">
-          <Button onClick={handleSubmit}>Add</Button>
+          <UsageTooltip usage={usage}>
+            <Button onClick={handleSubmit} disabled={usage.isZero}>
+              Add
+            </Button>
+          </UsageTooltip>
         </DialogFooter>
       </DialogContent>
     </Dialog>
