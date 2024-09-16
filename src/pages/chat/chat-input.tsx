@@ -2,6 +2,7 @@ import { FileIcon, PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
+import { UsageTooltip } from "@/components/usage-tooltip";
 export function ChatInput() {
   const {
     chatHook,
@@ -40,15 +41,17 @@ export function ChatInput() {
     <div className="p-2 bg-muted lg:gap-1 rounded-[26px] border-2 border-gray-300 shadow-md w-full">
       <div className="flex items-end gap-1.5 md:gap-2">
         <div className="relative">
-          <Button
-            className="mr-2 p-2 rounded-full"
-            onClick={() => setIsContentUploaderOpen(true)}
-            size="icon"
-            disabled={usage.isZero}
-          >
-            <FileIcon className="h-4 w-4" />
-            <span className="sr-only">Upload a file</span>
-          </Button>
+          <UsageTooltip usage={usage}>
+            <Button
+              className="mr-2 p-2 rounded-full"
+              onClick={() => setIsContentUploaderOpen(true)}
+              size="icon"
+              disabled={usage.isZero}
+            >
+              <FileIcon className="h-4 w-4" />
+              <span className="sr-only">Upload a file</span>
+            </Button>
+          </UsageTooltip>
         </div>
         <form
           onSubmit={(e) => {
@@ -87,18 +90,20 @@ export function ChatInput() {
           <button type="submit" id="chat-submit" className="hidden"></button>
         </form>
         <div className="relative">
-          <Button
-            type="button"
-            onClick={() => document.getElementById("chat-submit")?.click()}
-            disabled={
-              chatHook.isLoading || chatHook.input.length <= 0 || usage.isZero
-            }
-            className="rounded-full p-2 w-10 h-10"
-            size="icon"
-          >
-            <PenSquareIcon className="h-4 w-4" />
-            <span className="sr-only">Submit</span>
-          </Button>
+          <UsageTooltip usage={usage}>
+            <Button
+              type="button"
+              onClick={() => document.getElementById("chat-submit")?.click()}
+              disabled={
+                chatHook.isLoading || chatHook.input.length <= 0 || usage.isZero
+              }
+              className="rounded-full p-2 w-10 h-10"
+              size="icon"
+            >
+              <PenSquareIcon className="h-4 w-4" />
+              <span className="sr-only">Submit</span>
+            </Button>
+          </UsageTooltip>
         </div>
       </div>
     </div>

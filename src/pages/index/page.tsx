@@ -12,6 +12,7 @@ import { useAlert } from "@/components/alert";
 import { BASE_CHAT_MODEL } from "@/constants";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { getUsage, Usage } from "@/services/usage";
+import { UsageTooltip } from "@/components/usage-tooltip";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -100,14 +101,16 @@ function NewChatForm() {
                 placeholder="Type your message here..."
                 ref={input}
               />
-              <Button
-                type="submit"
-                className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
-                disabled={usage.isZero}
-              >
-                <PenSquareIcon className="h-4 w-4" />
-                <span className="sr-only">Send</span>
-              </Button>
+              <UsageTooltip usage={usage}>
+                <Button
+                  type="submit"
+                  className="rounded-full p-2 hover:bg-blue-400 w-10 h-10 transition-colors duration-300"
+                  disabled={usage.isZero}
+                >
+                  <PenSquareIcon className="h-4 w-4" />
+                  <span className="sr-only">Send</span>
+                </Button>
+              </UsageTooltip>
             </form>
             <div className="text-sm text-gray-500">
               Model: {BASE_CHAT_MODEL}

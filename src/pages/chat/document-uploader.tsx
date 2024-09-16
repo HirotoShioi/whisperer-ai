@@ -14,6 +14,8 @@ import {
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
+import { UsageTooltip } from "@/components/usage-tooltip";
+import { cn } from "@/lib/utils";
 
 export default function DocumentUploader() {
   const {
@@ -51,12 +53,16 @@ export default function DocumentUploader() {
       open={isDocumentUploaderOpen}
       onOpenChange={setIsDocumentUploaderOpen}
     >
-      <DialogTrigger
-        asChild
-        className="focus:outline-none"
-        disabled={usage.isZero}
-      >
-        <CirclePlus size={20} className="focus:outline-none cursor-pointer" />
+      <DialogTrigger asChild className="focus:outline-none">
+        <UsageTooltip usage={usage}>
+          <CirclePlus
+            size={20}
+            className={cn(
+              "focus:outline-none cursor-pointer",
+              usage.isZero ? "opacity-50 cursor-not-allowed" : ""
+            )}
+          />
+        </UsageTooltip>
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>
@@ -87,9 +93,11 @@ export default function DocumentUploader() {
           </div>
         </div>
         <DialogFooter className="flex justify-end">
-          <Button onClick={handleSubmit} disabled={usage.isZero}>
-            Add
-          </Button>
+          <UsageTooltip usage={usage}>
+            <Button onClick={handleSubmit} disabled={usage.isZero}>
+              Add
+            </Button>
+          </UsageTooltip>
         </DialogFooter>
       </DialogContent>
     </Dialog>
