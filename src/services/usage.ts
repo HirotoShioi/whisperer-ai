@@ -4,22 +4,29 @@ export class Usage {
   readonly remaining: number;
   readonly total: number;
   readonly resetAt: number;
+  readonly authorized: boolean;
 
-  constructor(remaining: number, total: number, resetAt: number) {
+  constructor(
+    remaining: number,
+    total: number,
+    resetAt: number,
+    authorized = true
+  ) {
     this.remaining = remaining;
     this.total = total;
     this.resetAt = resetAt;
+    this.authorized = authorized;
   }
 
   get isZero() {
-    return this.remaining <= 0;
+    return this.authorized && this.remaining <= 0;
   }
 }
 
 export async function getUsage(): Promise<Usage> {
   const session = await fetchAuthSession();
   if (!session.tokens?.idToken) {
-    return new Usage(0, 100, 0);
+    return new Usage(0, 100, 0, false);
   }
   const response = await fetch(`${import.meta.env.VITE_API_URL}/usage`, {
     headers: {

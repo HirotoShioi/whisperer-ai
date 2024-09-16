@@ -65,20 +65,6 @@ export const ChatContextProvider: React.FC<{
     return "list";
   });
 
-  async function redirectIfUnauthenticated() {
-    openAlert({
-      title: "Please sign in",
-      description: "Please sign in to use this feature",
-      actions: [
-        {
-          label: "OK",
-          onClick: () => {
-            navigate("/sign-in");
-          },
-        },
-      ],
-    });
-  }
   useEffect(() => {
     const message = loadFromLocalStorage(thread.id);
     if (message && initialMessages.length <= 0) {
@@ -101,7 +87,6 @@ export const ChatContextProvider: React.FC<{
 
   async function uploadFiles(acceptedFiles: File[]) {
     if (!user) {
-      await redirectIfUnauthenticated();
       return;
     }
     setIsUploadingDocuments(true);
@@ -169,7 +154,6 @@ export const ChatContextProvider: React.FC<{
 
   const uploadText = async (text: string) => {
     if (!user) {
-      await redirectIfUnauthenticated();
       return;
     }
     setIsUploadingDocuments(true);
@@ -187,7 +171,6 @@ export const ChatContextProvider: React.FC<{
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     if (!user) {
-      await redirectIfUnauthenticated();
       return;
     }
     if (chatHook.input.length <= 0) return;

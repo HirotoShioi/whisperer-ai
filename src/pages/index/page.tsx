@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { saveToLocalStorage } from "@/utils/local-storage";
 import { useRef } from "react";
 import Header from "@/components/header";
-import { useAlert } from "@/components/alert";
 import { BASE_CHAT_MODEL } from "@/constants";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { getUsage, Usage } from "@/services/usage";
@@ -54,25 +53,12 @@ function ThreadItem({ thread }: { thread: Thread }) {
 function NewChatForm() {
   const navigate = useNavigate();
   const { usage } = useLoaderData() as { usage: Usage };
-  const { openAlert } = useAlert();
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
   const { user } = useAuthenticator((context) => [context.user]);
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!user) {
-      openAlert({
-        title: "Please sign in",
-        description: "Please sign in to use the chat",
-        actions: [
-          {
-            label: "Sign in",
-            onClick: () => {
-              navigate("/sign-in");
-            },
-          },
-        ],
-      });
       return;
     }
     const inputValue = input.current?.value ?? "";
