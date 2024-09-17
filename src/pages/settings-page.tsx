@@ -26,7 +26,8 @@ export default function SettingsPage() {
   function showDeleteDatabaseAlert() {
     openAlert({
       title: "Delete Database",
-      description: "Are you sure you want to delete the database?",
+      description:
+        "Are you sure you want to delete the database? All your data will be lost.",
       actions: [
         {
           label: "Delete",

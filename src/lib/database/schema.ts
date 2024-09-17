@@ -20,7 +20,9 @@ const documents = pgTable("documents", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   fileType: varchar("file_type").notNull(),
-  threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH }).notNull(),
+  threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH })
+    .notNull()
+    .references(() => threads.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -81,7 +83,9 @@ const messages = pgTable("messages", {
     enum: ["user", "assistant", "tool", "function", "system", "data"],
   }).notNull(),
   content: text("content").notNull(),
-  threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH }).notNull(),
+  threadId: varchar("thread_id", { length: MAX_VARCHAR_LENGTH })
+    .notNull()
+    .references(() => threads.id, { onDelete: "cascade" }),
   toolInvocations: jsonb("tool_invocations"),
   createdAt: timestamp("created_at")
     .default(sql`now()`)
