@@ -3,15 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
 import { UsageTooltip } from "@/components/usage-tooltip";
+import { saveMessage } from "@/services/messages";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 export function ChatInput() {
-  const {
-    chatHook,
-    onSubmit,
-    usage,
-    setIsDocumentUploaderOpen: setIsContentUploaderOpen,
-  } = useChatContext();
+  const { chatHook, usage, thread, scrollToEnd, setIsDocumentUploaderOpen } =
+    useChatContext();
   const [isComposing, setIsComposing] = useState(false);
   const [rows, setRows] = useState(1);
+  const { user } = useAuthenticator((context) => [context.user]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -37,6 +36,20 @@ export function ChatInput() {
     chatHook.handleInputChange(e);
   };
 
+  const submitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!user) {
+      return;
+    }
+    if (chatHook.input.length <= 0) return;
+    await saveMessage({
+      role: "user",
+      content: chatHook.input,
+      threadId: thread.id,
+    });
+    scrollToEnd();
+    chatHook.handleSubmit(e);
+  };
+
   return (
     <div className="p-2 bg-muted lg:gap-1 rounded-[26px] border-2 border-gray-300 shadow-md w-full">
       <div className="flex items-end gap-1.5 md:gap-2">
@@ -44,7 +57,7 @@ export function ChatInput() {
           <UsageTooltip usage={usage}>
             <Button
               className="mr-2 p-2 rounded-full"
-              onClick={() => setIsContentUploaderOpen(true)}
+              onClick={() => setIsDocumentUploaderOpen(true)}
               size="icon"
               disabled={usage.isZero}
             >
@@ -56,7 +69,7 @@ export function ChatInput() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit(e);
+            submitMessage(e);
           }}
           className="flex gap-2 w-full items-center"
         >

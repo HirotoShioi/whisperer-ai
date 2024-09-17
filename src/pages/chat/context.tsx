@@ -11,7 +11,6 @@ import {
 import { saveDocument } from "@/services/documents";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
-import { saveMessage } from "@/services/messages";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
@@ -31,13 +30,11 @@ interface ChatContextType {
   documents: Document[];
   uploadFiles: (acceptedFiles: File[]) => Promise<void>;
   uploadText: (text: string) => Promise<void>;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   scrollRef: (element: HTMLDivElement | null) => void;
   scrollToEnd: () => void;
   isDocumentUploaderOpen: boolean;
   setIsDocumentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isUploadingDocuments: boolean;
-  setIsUploadingDocuments: React.Dispatch<React.SetStateAction<boolean>>;
   thread: Thread;
 }
 
@@ -169,20 +166,6 @@ export const ChatContextProvider: React.FC<{
     }
   };
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    if (!user) {
-      return;
-    }
-    if (chatHook.input.length <= 0) return;
-    await saveMessage({
-      role: "user",
-      content: chatHook.input,
-      threadId: thread.id,
-    });
-    chatHook.handleSubmit(e);
-    scrollToEnd();
-  };
-
   return (
     <ChatContext.Provider
       value={{
@@ -192,13 +175,11 @@ export const ChatContextProvider: React.FC<{
         documents: initialDocuments,
         uploadFiles,
         uploadText,
-        onSubmit,
         scrollRef,
         scrollToEnd,
         isDocumentUploaderOpen,
         setIsDocumentUploaderOpen,
         isUploadingDocuments,
-        setIsUploadingDocuments,
         thread,
         usage,
       }}
