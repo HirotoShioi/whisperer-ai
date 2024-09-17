@@ -63,8 +63,7 @@ function ChatContainer({ children }: { children: React.ReactNode }) {
 }
 
 function ChatPageContent() {
-  const { chatHook, scrollRef, scrollToEnd, thread, isSmallScreen } =
-    useChatContext();
+  const { chatHook, scrollRef, scrollToEnd, isSmallScreen } = useChatContext();
 
   useEffect(() => {
     scrollToEnd();
@@ -74,7 +73,7 @@ function ChatPageContent() {
     <div className="flex flex-row h-screen min-w-[20rem]">
       {!isSmallScreen && <Document />}
       <div className="w-full h-full flex flex-col">
-        <ChatTitle thread={thread} />
+        <ChatTitle />
         <div className="flex-grow overflow-hidden flex flex-col">
           <div className="flex-grow overflow-y-auto" ref={scrollRef}>
             <div className="mx-auto">

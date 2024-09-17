@@ -38,7 +38,7 @@ function DocumentItem({
       <fetcher.Form method="DELETE" onClick={handleDelete}>
         <input type="hidden" name="documentId" value={document.id} />
         <Button
-          className="text-gray-400 hover:text-red-600"
+          className="text-gray-400 hover:text-red-600 w-8 h-8 rounded-full hover:bg-gray-200"
           size="icon"
           type="submit"
           variant="ghost"

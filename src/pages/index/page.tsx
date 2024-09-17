@@ -38,7 +38,7 @@ export async function loader() {
 function ThreadItem({ thread }: { thread: Thread }) {
   return (
     <Link to={`/chat/${thread.id}`} className="cursor-pointer">
-      <Card className="hover:bg-gray-200 transition-colors duration-400">
+      <Card className="hover:bg-gray-200 bg-white transition-colors duration-400 hover:border-gray-300">
         <CardContent className="p-4">
           <h4 className="mb-2 truncate">{thread.title}</h4>
           <p className="text-sm text-gray-500">

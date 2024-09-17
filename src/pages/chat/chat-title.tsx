@@ -15,6 +15,7 @@ import { renameThread } from "@/services/threads";
 import { useNavigate, useRevalidator } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import Dropdown from "@/components/dropdown";
+import { useChatContext } from "./context";
 
 export interface ChatTitleProps {
   thread: Thread;
@@ -79,12 +80,13 @@ function EditTitle({ thread }: ChatTitleProps) {
   );
 }
 
-export function ChatTitle({ thread }: ChatTitleProps) {
+export function ChatTitle() {
+  const { isSmallScreen, thread } = useChatContext();
   const navigate = useNavigate();
   return (
     <header className="md:px-4 py-2 flex justify-between items-center">
       <div className="flex gap-2 items-center">
-        <div className="block md:hidden">
+        {isSmallScreen && (
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -93,7 +95,7 @@ export function ChatTitle({ thread }: ChatTitleProps) {
           >
             <ArrowLeft size={20} />
           </Button>
-        </div>
+        )}
         <EditTitle thread={thread} />
       </div>
       <Dropdown />
