@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "title": "設定",
+    "deleteDatabase": "データベースを削除",
+    "deleteConfirmation": "本当にデータベースを削除しますか？すべてのデータが失われます。",
+    "delete": "削除",
+    "databaseDeleted": "データベースが削除されました",
+    "databaseDeletedDescription": "データベースが削除されました。",
+    "ok": "OK"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "title": "Settings",
+    "deleteDatabase": "Delete Database",
+    "deleteConfirmation": "Are you sure you want to delete the database? All your data will be lost.",
+    "delete": "Delete",
+    "databaseDeleted": "Database deleted",
+    "databaseDeletedDescription": "Your database has been deleted.",
+    "ok": "OK"
+  }
+}
