@@ -12,7 +12,6 @@ import { deleteDocumentById, getDocumentsById } from "@/services/documents";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { DocumentPanel } from "./document-panel";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 import type { Thread, Document } from "@/lib/database/schema";
@@ -64,15 +63,15 @@ function ChatContainer({ children }: { children: React.ReactNode }) {
 }
 
 function ChatPageContent() {
-  const { chatHook, scrollRef, scrollToEnd, thread } = useChatContext();
-  const isSmallScreen = useMediaQuery("(max-width: 1000px)");
+  const { chatHook, scrollRef, scrollToEnd, thread, isSmallScreen } =
+    useChatContext();
 
   useEffect(() => {
     scrollToEnd();
   }, [scrollToEnd]);
 
   return (
-    <div className="flex flex-row h-screen">
+    <div className="flex flex-row h-screen min-w-[20rem]">
       {!isSmallScreen && <Document />}
       <div className="w-full h-full flex flex-col">
         <ChatTitle thread={thread} />

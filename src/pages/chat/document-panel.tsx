@@ -4,13 +4,12 @@ import type { Document } from "@/lib/database/schema";
 import { useFetcher } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { Markdown } from "@/components/markdown";
 import DocumentUploader from "./document-uploader";
 import { useChatContext } from "@/pages/chat/context";
 import { Skeleton } from "@/components/ui/skeleton";
-import Dropdown from "@/components/dropdown";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 function DocumentItem({
   document,
@@ -131,9 +130,9 @@ function DocumentHeader({
 }) {
   if (!document) {
     return (
-      <div className="sticky flex flex-col justify-between gap-2">
+      <div className="sticky">
         <div className="pb-6 top-0 p-4 flex items-center">
-          <Dropdown />
+          <Logo />
         </div>
         <div className="flex justify-between items-center px-4">
           <div className="flex items-center gap-2">
@@ -168,15 +167,15 @@ export function DocumentPanel() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
-  const isMobile = useMediaQuery("(max-width: 1400px)");
   const {
     panelState,
     setPanelState,
     documents,
+    isSmallScreen,
     isUploadingDocuments: isUploadingContent,
   } = useChatContext();
 
-  const panelWidth = isMobile
+  const panelWidth = isSmallScreen
     ? "100%"
     : panelState === "detail"
       ? "700px"
@@ -196,7 +195,7 @@ export function DocumentPanel() {
     }
   };
 
-  const isHidden = isMobile || panelState === "closed";
+  const isHidden = isSmallScreen || panelState === "closed";
 
   return (
     <div className={`z-[5] pointer-events-auto ${isHidden ? "hidden" : ""}`}>

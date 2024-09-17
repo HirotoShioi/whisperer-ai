@@ -74,7 +74,7 @@ function NewChatForm() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto w-full">
+    <div className="max-w-2xl mx-auto w-full p-4 md:p-0">
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col gap-2">
@@ -116,13 +116,13 @@ export default function IndexPage() {
     <>
       <Header />
       <div className="w-full">
-        <main className="max-w-7xl mx-auto flex flex-col gap-8 2xl:pr-20">
+        <main className="max-w-7xl mx-auto space-y-8">
           <h2 className="text-4xl font-serif text-center mb-4">
             {getGreeting()}
           </h2>
           <NewChatForm />
 
-          <div className="max-w-2xl mx-auto w-full">
+          <div className="max-w-2xl mx-auto w-full px-4 md:px-0">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Your recent chats</h3>
               <Button variant="link" size="sm">

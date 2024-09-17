@@ -19,6 +19,7 @@ import { renameThread } from "@/services/threads";
 import { nameConversation } from "@/lib/ai/name-conversation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { Usage } from "@/services/usage";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -35,6 +36,7 @@ interface ChatContextType {
   isDocumentUploaderOpen: boolean;
   setIsDocumentUploaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isUploadingDocuments: boolean;
+  isSmallScreen: boolean;
   thread: Thread;
 }
 
@@ -51,6 +53,7 @@ export const ChatContextProvider: React.FC<{
   const { openAlert } = useAlert();
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const navigate = useNavigate();
+  const isSmallScreen = useMediaQuery("(max-width: 1200px)");
   const [isDocumentUploaderOpen, setIsDocumentUploaderOpen] = useState(false);
   const { user } = useAuthenticator((c) => [c.user]);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
@@ -172,6 +175,7 @@ export const ChatContextProvider: React.FC<{
         chatHook,
         panelState,
         setPanelState,
+        isSmallScreen,
         documents: initialDocuments,
         uploadFiles,
         uploadText,
