@@ -18,11 +18,48 @@ type AlertProps = {
   actions: {
     label: string;
     onClick?: () => void;
-    variant?: "cancel" | "action";
+    variant?: "cancel" | "action" | "destructive";
     disabled?: boolean;
     loading?: boolean;
   }[];
 };
+
+function AlertButton({
+  label,
+  onClick,
+  disabled,
+  variant,
+}: {
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  variant?: "cancel" | "action" | "destructive";
+}) {
+  if (variant === "cancel") {
+    return (
+      <AlertDialogCancel disabled={disabled} onClick={onClick}>
+        {label}
+      </AlertDialogCancel>
+    );
+  }
+  if (variant === "destructive") {
+    return (
+      <AlertDialogAction
+        disabled={disabled}
+        onClick={onClick}
+        className="bg-red-600 hover:bg-red-700"
+      >
+        {label}
+      </AlertDialogAction>
+    );
+  }
+  return (
+    <AlertDialogAction disabled={disabled} onClick={onClick}>
+      {label}
+    </AlertDialogAction>
+  );
+}
+
 function Alert({
   isOpen,
   onOpenChange,
@@ -38,17 +75,9 @@ function Alert({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          {actions.map((action, index) =>
-            action.variant === "cancel" ? (
-              <AlertDialogCancel key={index} onClick={action.onClick}>
-                {action.label}
-              </AlertDialogCancel>
-            ) : (
-              <AlertDialogAction key={index} onClick={action.onClick}>
-                {action.label}
-              </AlertDialogAction>
-            )
-          )}
+          {actions.map((action, index) => (
+            <AlertButton key={index} {...action} />
+          ))}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

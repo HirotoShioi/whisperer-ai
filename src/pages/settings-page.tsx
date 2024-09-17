@@ -1,28 +1,40 @@
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { pageWrapperStyles } from "@/styles/common";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { DB_NAME } from "@/constants";
+import { useAlert } from "@/components/alert";
 
 export default function SettingsPage() {
+  const { openAlert } = useAlert();
   async function handleDeleteDatabase() {
     indexedDB.deleteDatabase(`/pglite/${DB_NAME}`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    // Refresh the page after successful deletion
-    window.location.reload();
+    openAlert({
+      title: "Database deleted",
+      description: "Your database has been deleted.",
+      actions: [
+        {
+          label: "OK",
+          variant: "destructive",
+          onClick: () => window.location.reload(),
+        },
+      ],
+    });
+  }
+  function showDeleteDatabaseAlert() {
+    openAlert({
+      title: "Delete Database",
+      description: "Are you sure you want to delete the database?",
+      actions: [
+        {
+          label: "Delete",
+          variant: "destructive",
+          onClick: handleDeleteDatabase,
+        },
+      ],
+    });
   }
 
   return (
@@ -30,34 +42,17 @@ export default function SettingsPage() {
       <Header />
       <div className={cn(pageWrapperStyles)}>
         <div className="space-y-4">
-          <div className="flex flex-col gap-4">
-            <Label htmlFor="delete-database">Delete Database</Label>
-            <div className="flex items-center">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Delete</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your data from the database.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteDatabase}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <div className="border rounded-lg p-4">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="delete-database" className="text-lg font-medium">
+                Delete Database
+              </Label>
+              <div className="flex items-center">
+                <Button variant="destructive" onClick={showDeleteDatabaseAlert}>
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
         </div>
