@@ -1,6 +1,7 @@
 import { Message as M } from "ai/react";
 import { Markdown } from "@/components/markdown";
 import { ToolNames } from "@/hooks/use-chat";
+import { useTranslation } from "react-i18next";
 
 type ToolInvocation = {
   toolCallId: string;
@@ -9,14 +10,15 @@ type ToolInvocation = {
 };
 
 function ToolMessage({ toolInvocation }: { toolInvocation: ToolInvocation }) {
+  const { t } = useTranslation();
   const message = () => {
     switch (toolInvocation.toolName as ToolNames) {
       case "getRelavantInformation":
-        return "Searching information relevant to the conversation... ";
+        return t("toolMessage.searchingInformation");
       case "saveDocument":
-        return "Embedding Documents...";
+        return t("toolMessage.embeddingDocuments");
       default:
-        return "Processing...";
+        return t("toolMessage.processing");
     }
   };
   return (

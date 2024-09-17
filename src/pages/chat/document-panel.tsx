@@ -10,6 +10,7 @@ import { useChatContext } from "@/pages/chat/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { useTranslation } from "react-i18next";
 
 function DocumentItem({
   document,
@@ -67,12 +68,13 @@ function DocumentList({
   documents: Document[];
   onSelect: (document: Document) => void;
 }) {
+  const { t } = useTranslation();
   if (documents.length === 0) {
     return (
       <div className="flex flex-row items-center justify-center px-2 gap-4">
         <FileIcon className="w-8 h-8 text-gray-500" />
         <p className="text-gray-500 text-sm mt-2">
-          Drag and drop files into the chat to add them as documents.
+          {t("documentPanel.dragAndDropFiles")}
         </p>
       </div>
     );
@@ -128,6 +130,7 @@ function DocumentHeader({
   document: Document | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   if (!document) {
     return (
       <div className="sticky">
@@ -136,7 +139,9 @@ function DocumentHeader({
         </div>
         <div className="flex justify-between items-center px-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">Documents</h2>
+            <h2 className="text-lg font-semibold">
+              {t("documentPanel.documents")}
+            </h2>
             <DocumentUploader />
           </div>
         </div>

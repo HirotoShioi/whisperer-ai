@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
 import { UsageTooltip } from "@/components/usage-tooltip";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function DocumentUploader() {
   const {
@@ -25,6 +26,7 @@ export default function DocumentUploader() {
     setIsDocumentUploaderOpen,
     usage,
   } = useChatContext();
+  const { t } = useTranslation();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -64,17 +66,18 @@ export default function DocumentUploader() {
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add Documents</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {t("documentUploader.addDocuments")}
+          </DialogTitle>
           <DialogDescription className="text-lg">
-            Add documents to the conversation. This documents will help answer
-            questions about the documents provided.
+            {t("documentUploader.addDocumentsDescription")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <textarea
             className="w-full h-80 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             ref={textAreaRef}
-            placeholder="Enter the text you want to add as a source."
+            placeholder={t("documentUploader.enterText")}
             disabled={usage.isZero}
           />
           <div
@@ -86,15 +89,15 @@ export default function DocumentUploader() {
             <input {...getInputProps()} disabled={usage.isZero} />
             <p className="text-gray-500">
               {isDragActive
-                ? "Drop the files here"
-                : "Drag & drop some files here, or click to select files"}
+                ? t("documentUploader.dropFiles")
+                : t("documentUploader.dragAndDropFiles")}
             </p>
           </div>
         </div>
         <DialogFooter className="flex justify-end">
           <UsageTooltip usage={usage}>
             <Button onClick={handleSubmit} disabled={usage.isZero}>
-              Add
+              {t("documentUploader.add")}
             </Button>
           </UsageTooltip>
         </DialogFooter>

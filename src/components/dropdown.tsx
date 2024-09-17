@@ -7,6 +7,7 @@ import {
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { signOut } from "aws-amplify/auth";
 import { Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 export function HeaderMenuItem({
@@ -24,6 +25,7 @@ export function HeaderMenuItem({
 }
 
 export default function Dropdown() {
+  const { t } = useTranslation();
   const { user } = useAuthenticator((c) => [c.user]);
   return (
     <DropdownMenu>
@@ -31,13 +33,17 @@ export default function Dropdown() {
         <Menu size={20} />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <HeaderMenuItem href="/settings">Settings</HeaderMenuItem>
+        <HeaderMenuItem href="/settings">
+          {t("dropdown.settings")}
+        </HeaderMenuItem>
         {user ? (
           <DropdownMenuItem onClick={() => signOut()}>
-            Sign out
+            {t("dropdown.signOut")}
           </DropdownMenuItem>
         ) : (
-          <HeaderMenuItem href="/sign-in">Sign in</HeaderMenuItem>
+          <HeaderMenuItem href="/sign-in">
+            {t("dropdown.signIn")}
+          </HeaderMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

@@ -7,5 +7,68 @@
     "databaseDeleted": "データベースが削除されました",
     "databaseDeletedDescription": "データベースが削除されました。",
     "ok": "OK"
+  },
+  "notFound": {
+    "title": "404",
+    "description": "申し訳ありません。お探しのページは存在しません。",
+    "goHome": "ホームに戻る"
+  },
+  "greeting": {
+    "morning": "Good Morning",
+    "afternoon": "Good Afternoon",
+    "evening": "Good Evening"
+  },
+  "index": {
+    "viewAll": "すべて表示",
+    "model": "生成モデル",
+    "send": "送信",
+    "placeholder": "メッセージを入力してください",
+    "recentChats": "最近の会話履歴"
+  },
+  "dropdown": {
+    "signOut": "サインアウト",
+    "signIn": "サインイン",
+    "settings": "設定"
+  },
+  "error": {
+    "unexpectedError": "予期せぬエラーが発生しました。",
+    "goHome": "ホームに戻る"
+  },
+  "usageTooltip": {
+    "pleaseSignIn": "この機能を使用するにはサインインしてください",
+    "signIn": "サインイン",
+    "usageLimit": "使用制限に達しました。"
+  },
+  "chatInput": {
+    "placeholder": "メッセージを入力してください"
+  },
+  "chatTitle": {
+    "renameChat": "チャット名を変更",
+    "newTitle": "新しいチャット名",
+    "save": "保存",
+    "cancel": "キャンセル"
+  },
+  "documentPanel": {
+    "documents": "ドキュメント",
+    "dragAndDropFiles": "チャットにファイルをドラッグして追加します。"
+  },
+  "documentUploader": {
+    "dropFiles": "ファイルをここにドロップ",
+    "dragAndDropFiles": "チャットにファイルをドラッグして追加します。",
+    "add": "保存",
+    "enterText": "保存するテキストを入力してください",
+    "addDocuments": "ドキュメントを追加",
+    "addDocumentsDescription": "チャットにドキュメントを追加することができます。"
+  },
+  "toolMessage": {
+    "searchingInformation": "情報を検索中...",
+    "embeddingDocuments": "ドキュメントを埋め込み中...",
+    "processing": "処理中..."
+  },
+  "callback": {
+    "redirecting": "リダイレクト中..."
+  },
+  "database": {
+    "loading": "データベースを読み込み中..."
   }
 }

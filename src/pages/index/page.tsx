@@ -12,17 +12,7 @@ import { BASE_CHAT_MODEL } from "@/constants";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { getUsage, Usage } from "@/services/usage";
 import { UsageTooltip } from "@/components/usage-tooltip";
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) {
-    return "Good morning";
-  } else if (hour >= 12 && hour < 18) {
-    return "Good afternoon";
-  } else {
-    return "Good evening";
-  }
-}
+import { useTranslation } from "react-i18next";
 
 export async function loader() {
   const [threads, usage] = await Promise.all([
@@ -55,6 +45,7 @@ function NewChatForm() {
   const { usage } = useLoaderData() as { usage: Usage };
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
   const { user } = useAuthenticator((context) => [context.user]);
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,7 +63,6 @@ function NewChatForm() {
     saveToLocalStorage(newId, JSON.stringify(message));
     navigate(`/chat/${newId}`);
   }
-
   return (
     <div className="max-w-2xl mx-auto w-full p-4 md:p-0">
       <Card>
@@ -84,7 +74,7 @@ function NewChatForm() {
             >
               <input
                 className="flex-grow mr-0 bg-white rounded-lg border-0 focus:outline-none focus:ring-0 p-2 resize-none"
-                placeholder="Type your message here..."
+                placeholder={t("index.placeholder")}
                 ref={input}
                 disabled={usage.isZero}
               />
@@ -95,12 +85,12 @@ function NewChatForm() {
                   disabled={usage.isZero}
                 >
                   <PenSquareIcon className="h-4 w-4" />
-                  <span className="sr-only">Send</span>
+                  <span className="sr-only">{t("index.send")}</span>
                 </Button>
               </UsageTooltip>
             </form>
             <div className="text-sm text-gray-500">
-              Model: {BASE_CHAT_MODEL}
+              {t("index.model")}: {BASE_CHAT_MODEL}
             </div>
           </div>
         </CardContent>
@@ -110,7 +100,18 @@ function NewChatForm() {
 }
 
 export default function IndexPage() {
+  const { t } = useTranslation();
   const { threads } = useLoaderData() as { threads: Thread[] };
+  function getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return t("greeting.morning");
+    } else if (hour >= 12 && hour < 18) {
+      return t("greeting.afternoon");
+    } else {
+      return t("greeting.evening");
+    }
+  }
 
   return (
     <>
@@ -124,9 +125,11 @@ export default function IndexPage() {
 
           <div className="max-w-2xl mx-auto w-full px-4 md:px-0">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Your recent chats</h3>
+              <h3 className="text-lg font-semibold">
+                {t("index.recentChats")}
+              </h3>
               <Button variant="link" size="sm">
-                View all →
+                {t("index.viewAll")} →
               </Button>
             </div>
 

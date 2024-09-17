@@ -7,5 +7,60 @@
     "databaseDeleted": "Database deleted",
     "databaseDeletedDescription": "Your database has been deleted.",
     "ok": "OK"
+  },
+  "notFound": {
+    "title": "404",
+    "description": "Sorry, the page you are looking for does not exist.",
+    "goHome": "Go Home"
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "index": {
+    "viewAll": "View all",
+    "model": "Model",
+    "send": "Send",
+    "placeholder": "Enter your message...",
+    "recentChats": "Your recent chats"
+  },
+  "dropdown": {
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "settings": "Settings"
+  },
+  "error": {
+    "unexpectedError": "Sorry, an unexpected error has occurred.",
+    "goHome": "Go Home"
+  },
+  "usageTooltip": {
+    "pleaseSignIn": "Please sign in to use this feature",
+    "signIn": "Sign in",
+    "usageLimit": "You have reached your usage limit."
+  },
+  "chatInput": {
+    "placeholder": "Enter your message..."
+  },
+  "chatTitle": {
+    "renameChat": "Rename Chat",
+    "newTitle": "New title",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "documentPanel": {
+    "documents": "Documents",
+    "dragAndDropFiles": "Drag and drop files into the chat to add them as documents."
+  },
+  "toolMessage": {
+    "searchingInformation": "Searching information",
+    "embeddingDocuments": "Embedding documents",
+    "processing": "Processing..."
+  },
+  "callback": {
+    "redirecting": "Redirecting..."
+  },
+  "database": {
+    "loading": "Loading database..."
   }
 }

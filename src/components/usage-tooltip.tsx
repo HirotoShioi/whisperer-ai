@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export type UsageTooltipProps = {
   usage: Usage;
@@ -23,6 +24,7 @@ export type UsageTooltipProps = {
 
 export function UsageTooltip({ usage, children }: UsageTooltipProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   if (!usage.authorized) {
     return (
       <AlertDialog>
@@ -31,10 +33,10 @@ export function UsageTooltip({ usage, children }: UsageTooltipProps) {
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Please sign in</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please sign in to use this feature
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {t("usageTooltip.pleaseSignIn")}
+            </AlertDialogTitle>
+            <AlertDialogDescription></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
@@ -42,7 +44,7 @@ export function UsageTooltip({ usage, children }: UsageTooltipProps) {
                 navigate("/sign-in");
               }}
             >
-              Sign in
+              {t("usageTooltip.signIn")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -56,7 +58,7 @@ export function UsageTooltip({ usage, children }: UsageTooltipProps) {
           <div>{children}</div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>You have reached your usage limit.</p>
+          <p>{t("usageTooltip.usageLimit")}</p>
         </TooltipContent>
       </Tooltip>
     );

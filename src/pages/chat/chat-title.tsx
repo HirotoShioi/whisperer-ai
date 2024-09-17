@@ -16,12 +16,14 @@ import { useNavigate, useRevalidator } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import Dropdown from "@/components/dropdown";
 import { useChatContext } from "./context";
+import { useTranslation } from "react-i18next";
 
 export interface ChatTitleProps {
   thread: Thread;
 }
 
 function EditTitle({ thread }: ChatTitleProps) {
+  const { t } = useTranslation();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(thread.title);
   const { revalidate } = useRevalidator();
@@ -48,14 +50,14 @@ function EditTitle({ thread }: ChatTitleProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename Chat</DialogTitle>
+          <DialogTitle>{t("chatTitle.renameChat")}</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSaveTitle}>
           <Input
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder="New title"
+            placeholder={t("chatTitle.newTitle")}
             autoFocus
           />
           <button
@@ -71,9 +73,9 @@ function EditTitle({ thread }: ChatTitleProps) {
             }
             variant="outline"
           >
-            Cancel
+            {t("chatTitle.cancel")}
           </Button>
-          <Button type="submit">Save</Button>
+          <Button type="submit">{t("chatTitle.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -5,10 +5,13 @@ import { useChatContext } from "@/pages/chat/context";
 import { UsageTooltip } from "@/components/usage-tooltip";
 import { saveMessage } from "@/services/messages";
 import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useTranslation } from "react-i18next";
+
 export function ChatInput() {
   const { chatHook, usage, thread, scrollToEnd, setIsDocumentUploaderOpen } =
     useChatContext();
   const [isComposing, setIsComposing] = useState(false);
+  const { t } = useTranslation();
   const [rows, setRows] = useState(1);
   const { user } = useAuthenticator((context) => [context.user]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -77,7 +80,7 @@ export function ChatInput() {
             ref={textareaRef}
             className="w-full bg-muted rounded-lg border-0 focus:outline-none focus:ring-0 resize-none h-full"
             style={{ minHeight: "20px" }}
-            placeholder="Enter your message..."
+            placeholder={t("chatInput.placeholder")}
             onChange={handleTextareaChange}
             disabled={chatHook.isLoading || usage.isZero}
             onCompositionStart={() => setIsComposing(true)}
