@@ -21,6 +21,9 @@ export class Usage {
   get isZero() {
     return this.authorized && this.remaining <= 0;
   }
+  static default() {
+    return new Usage(0, 100, 0, false);
+  }
 }
 
 export async function getUsage(): Promise<Usage> {

@@ -17,20 +17,20 @@ import { Thread } from "@/lib/database/schema";
 import { useRenameThreadMutation } from "@/services/threads/mutations";
 import { nameConversation } from "@/lib/ai/name-conversation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { Usage } from "@/services/usage";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useMessagesQuery } from "@/services/messages/queries";
 import { useDocumentsQuery } from "@/services/documents/queries";
 import { useDocumentCreateMutation } from "@/services/documents/mutations";
 import { FullPageLoader } from "@/components/fulll-page-loader";
 import { useTranslation } from "react-i18next";
+import { useUsageQuery } from "@/services/usage/queries";
+import { Usage } from "@/services/usage";
 
 export type PanelState = "closed" | "list" | "detail";
 
 interface ChatContextType {
   chatHook: ReturnType<typeof useChat>;
   panelState: PanelState;
-  usage: Usage;
   setPanelState: React.Dispatch<React.SetStateAction<PanelState>>;
   documents: Document[];
   uploadFiles: (acceptedFiles: File[]) => Promise<void>;
@@ -42,16 +42,17 @@ interface ChatContextType {
   isUploadingDocuments: boolean;
   isSmallScreen: boolean;
   thread: Thread;
+  usage: Usage;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatContextProvider: React.FC<{
   children: React.ReactNode;
-  usage: Usage;
   thread: Thread;
-}> = ({ children, usage, thread }) => {
+}> = ({ children, thread }) => {
   const { t } = useTranslation();
+  const usageQuery = useUsageQuery();
   const messagesQuery = useMessagesQuery(thread.id);
   const documentQuery = useDocumentsQuery(thread.id);
   const { mutateAsync: saveDocument } = useDocumentCreateMutation(thread.id);
@@ -195,7 +196,11 @@ export const ChatContextProvider: React.FC<{
     }
   };
 
-  if (messagesQuery.isLoading || documentQuery.isLoading) {
+  if (
+    messagesQuery.isLoading ||
+    documentQuery.isLoading ||
+    usageQuery.isLoading
+  ) {
     // あとでskeletonを入れる
     return <FullPageLoader label={t("page.loading")} />;
   }
@@ -215,7 +220,7 @@ export const ChatContextProvider: React.FC<{
         setIsDocumentUploaderOpen,
         isUploadingDocuments,
         thread,
-        usage,
+        usage: usageQuery.data || Usage.default(),
       }}
     >
       {children}

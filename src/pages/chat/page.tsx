@@ -1,54 +1,24 @@
-import {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  redirect,
-  useLoaderData,
-  useParams,
-} from "react-router-dom";
+import { LoaderFunctionArgs, redirect, useLoaderData } from "react-router-dom";
 import { getThreadById } from "@/services/threads/service";
 import { useEffect } from "react";
-import { deleteDocumentById } from "@/services/documents/service";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { DocumentPanel } from "./document-panel";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import type { Document } from "@/lib/database/schema";
+import type { Document, Thread } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
-import { getUsage, Usage } from "@/services/usage";
-import { useThreadQuery } from "@/services/threads/queries";
-import { FullPageLoader } from "@/components/fulll-page-loader";
-import { useTranslation } from "react-i18next";
-
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  switch (request.method) {
-    case "POST":
-      return Response.json({ success: true });
-    case "DELETE": {
-      const documentId = formData.get("documentId");
-      if (typeof documentId === "string") {
-        await deleteDocumentById(documentId);
-      }
-      return Response.json({ success: true });
-    }
-  }
-  return null;
-}
 
 export async function loader(params: LoaderFunctionArgs) {
   const threadId = params.params.threadId;
   if (!threadId) {
     return { messages: [] };
   }
-  const [thread, usage] = await Promise.all([
-    getThreadById(threadId),
-    getUsage(),
-  ]);
+  const thread = await getThreadById(threadId);
   if (!thread) {
     return redirect(`/`);
   }
-  return { thread, usage };
+  return { thread };
 }
 
 const Document = React.memo(DocumentPanel);
@@ -95,17 +65,9 @@ function ChatPageContent() {
 }
 
 export default function ChatPage() {
-  const { usage } = useLoaderData() as {
-    usage: Usage;
-  };
-  const params = useParams();
-  const { t } = useTranslation();
-  const { data: thread, isLoading } = useThreadQuery(params.threadId!);
-  if (isLoading || !thread) {
-    return <FullPageLoader label={t("page.loadingThread")} />;
-  }
+  const { thread } = useLoaderData() as { thread: Thread };
   return (
-    <ChatContextProvider usage={usage} thread={thread}>
+    <ChatContextProvider thread={thread}>
       <ChatPageContent />
     </ChatContextProvider>
   );

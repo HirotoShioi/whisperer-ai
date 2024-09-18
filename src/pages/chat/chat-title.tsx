@@ -11,7 +11,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ArrowLeft, Pencil } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useRevalidator } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import Dropdown from "@/components/dropdown";
 import { useChatContext } from "./context";
@@ -26,6 +26,7 @@ function EditTitle({ thread }: ChatTitleProps) {
   const { t } = useTranslation();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(thread.title);
+  const { revalidate } = useRevalidator();
   const { mutate: renameThread } = useRenameThreadMutation(thread.id);
   const handleSaveTitle = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ function EditTitle({ thread }: ChatTitleProps) {
     renameThread(editedTitle, {
       onSettled: () => {
         setIsEditingTitle(false);
+        revalidate();
       },
     });
   };
@@ -75,7 +77,14 @@ function EditTitle({ thread }: ChatTitleProps) {
           >
             {t("chatTitle.cancel")}
           </Button>
-          <Button type="submit">{t("chatTitle.save")}</Button>
+          <Button
+            type="submit"
+            onClick={() => {
+              document.getElementById("edit-title-button")?.click();
+            }}
+          >
+            {t("chatTitle.save")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
