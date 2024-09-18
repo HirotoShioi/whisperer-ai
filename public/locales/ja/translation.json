@@ -5,7 +5,7 @@
     "deleteConfirmation": "本当にデータベースを削除しますか？すべてのデータが失われます。",
     "delete": "削除",
     "databaseDeleted": "データベースが削除されました",
-    "databaseDeletedDescription": "データベースが削除されました。",
+    "databaseDeletedDescription": "データベースが削除されました。空のデータベースを再作成します。",
     "ok": "OK",
     "language": "言語設定"
   },
