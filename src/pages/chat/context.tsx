@@ -18,12 +18,8 @@ import { useRenameThreadMutation } from "@/services/threads/mutations";
 import { nameConversation } from "@/lib/ai/name-conversation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useMessagesQuery } from "@/services/messages/queries";
-import { useDocumentsQuery } from "@/services/documents/queries";
 import { useDocumentCreateMutation } from "@/services/documents/mutations";
-import { FullPageLoader } from "@/components/fulll-page-loader";
 import { useTranslation } from "react-i18next";
-import { useUsageQuery } from "@/services/usage/queries";
 import { Usage } from "@/services/usage";
 
 export type PanelState = "closed" | "list" | "detail";
@@ -47,14 +43,21 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-export const ChatContextProvider: React.FC<{
+export type ChatContextProviderProps = {
   children: React.ReactNode;
   thread: Thread;
-}> = ({ children, thread }) => {
+  messages: Message[];
+  documents: Document[];
+  usage: Usage;
+};
+export function ChatContextProvider({
+  children,
+  thread,
+  messages,
+  documents,
+  usage,
+}: ChatContextProviderProps) {
   const { t } = useTranslation();
-  const usageQuery = useUsageQuery();
-  const messagesQuery = useMessagesQuery(thread.id);
-  const documentQuery = useDocumentsQuery(thread.id);
   const { mutateAsync: saveDocument } = useDocumentCreateMutation(thread.id);
   const { mutateAsync: renameThread } = useRenameThreadMutation(thread.id);
   const { openAlert } = useAlert();
@@ -64,12 +67,7 @@ export const ChatContextProvider: React.FC<{
   const [isDocumentUploaderOpen, setIsDocumentUploaderOpen] = useState(false);
   const { user } = useAuthenticator((c) => [c.user]);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
-  const chatHook = useChat(
-    thread.id,
-    messagesQuery.data && messagesQuery.data.length > 0
-      ? messagesQuery.data
-      : []
-  );
+  const chatHook = useChat(thread.id, messages);
   const [panelState, setPanelState] = useState<PanelState>(() => {
     if (window.innerWidth < 768) {
       return "closed";
@@ -80,7 +78,7 @@ export const ChatContextProvider: React.FC<{
   // ここもあとで修正する
   useEffect(() => {
     const message = loadFromLocalStorage(thread.id);
-    if (message && messagesQuery.data && messagesQuery.data.length <= 0) {
+    if (message && messages.length <= 0) {
       const parsedMessage = JSON.parse(message);
       chatHook.append(parsedMessage);
       deleteFromLocalStorage(thread.id);
@@ -88,14 +86,7 @@ export const ChatContextProvider: React.FC<{
         renameThread(name)
       );
     }
-  }, [
-    thread.id,
-    messagesQuery.data,
-    chatHook,
-    openAlert,
-    navigate,
-    renameThread,
-  ]);
+  }, [thread.id, messages, chatHook, openAlert, navigate, renameThread]);
 
   // ここもあとで修正する
   async function uploadFiles(acceptedFiles: File[]) {
@@ -196,14 +187,6 @@ export const ChatContextProvider: React.FC<{
     }
   };
 
-  if (
-    messagesQuery.isLoading ||
-    documentQuery.isLoading ||
-    usageQuery.isLoading
-  ) {
-    // あとでskeletonを入れる
-    return <FullPageLoader label={t("page.loading")} />;
-  }
   return (
     <ChatContext.Provider
       value={{
@@ -211,7 +194,7 @@ export const ChatContextProvider: React.FC<{
         panelState,
         setPanelState,
         isSmallScreen,
-        documents: documentQuery.data || [],
+        documents,
         uploadFiles,
         uploadText,
         scrollRef,
@@ -220,13 +203,13 @@ export const ChatContextProvider: React.FC<{
         setIsDocumentUploaderOpen,
         isUploadingDocuments,
         thread,
-        usage: usageQuery.data || Usage.default(),
+        usage,
       }}
     >
       {children}
     </ChatContext.Provider>
   );
-};
+}
 
 export const useChatContext = () => {
   const context = useContext(ChatContext);

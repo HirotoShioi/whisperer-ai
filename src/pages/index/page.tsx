@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { PenSquareIcon } from "lucide-react";
+import { ArrowRight, PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { newThreadId } from "@/services/threads/service";
 import { useCreateThreadMutation } from "@/services/threads/mutations";
@@ -126,7 +126,7 @@ export default function IndexPage() {
                 {t("index.recentChats")}
               </h3>
               <Button variant="link" size="sm">
-                {t("index.viewAll")} →
+                {t("index.viewAll")} <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
 

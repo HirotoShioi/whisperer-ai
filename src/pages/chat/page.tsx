@@ -8,6 +8,11 @@ import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
 import type { Document, Thread } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
+import { useUsageQuery } from "@/services/usage/queries";
+import { useMessagesQuery } from "@/services/messages/queries";
+import { useDocumentsQuery } from "@/services/documents/queries";
+import { FullPageLoader } from "@/components/fulll-page-loader";
+import { useTranslation } from "react-i18next";
 
 export async function loader(params: LoaderFunctionArgs) {
   const threadId = params.params.threadId;
@@ -66,8 +71,21 @@ function ChatPageContent() {
 
 export default function ChatPage() {
   const { thread } = useLoaderData() as { thread: Thread };
+  const { t } = useTranslation();
+  const usageQuery = useUsageQuery();
+  const messagesQuery = useMessagesQuery(thread.id);
+  const documentQuery = useDocumentsQuery(thread.id);
+  if (!usageQuery.data || !messagesQuery.data || !documentQuery.data) {
+    return <FullPageLoader label={t("page.loading")} />;
+  }
+
   return (
-    <ChatContextProvider thread={thread}>
+    <ChatContextProvider
+      thread={thread}
+      messages={messagesQuery.data}
+      documents={documentQuery.data}
+      usage={usageQuery.data}
+    >
       <ChatPageContent />
     </ChatContextProvider>
   );
