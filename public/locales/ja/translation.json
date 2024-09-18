@@ -15,9 +15,9 @@
     "goHome": "ホームに戻る"
   },
   "greeting": {
-    "morning": "Good Morning",
-    "afternoon": "Good Afternoon",
-    "evening": "Good Evening"
+    "morning": "おはようございます",
+    "afternoon": "こんにちは",
+    "evening": "こんばんは"
   },
   "index": {
     "viewAll": "すべて表示",
@@ -51,15 +51,15 @@
   },
   "documentPanel": {
     "documents": "ドキュメント",
-    "dragAndDropFiles": "チャットにファイルをドラッグして追加します。"
+    "dragAndDropFiles": "ファイルをドラッグして追加"
   },
   "documentUploader": {
     "dropFiles": "ファイルをここにドロップ",
-    "dragAndDropFiles": "チャットにファイルをドラッグして追加します。",
+    "dragAndDropFiles": "ファイルをドラッグして追加",
     "add": "保存",
     "enterText": "保存するテキストを入力してください",
     "addDocuments": "ドキュメントを追加",
-    "addDocumentsDescription": "チャットにドキュメントを追加することができます。"
+    "addDocumentsDescription": "ドキュメントを追加すると、アプリがユーザーにとって重要な情報に基づいて回答を返せるようになります。"
   },
   "toolMessage": {
     "searchingInformation": "情報を検索中...",

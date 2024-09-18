@@ -58,6 +58,14 @@
     "embeddingDocuments": "Embedding documents",
     "processing": "Processing..."
   },
+  "documentUploader": {
+    "dropFiles": "Drop files here",
+    "dragAndDropFiles": "Drag and drop files",
+    "add": "Add",
+    "enterText": "Enter text to save",
+    "addDocuments": "Add documents",
+    "addDocumentsDescription": "Adding documents will allow the app to provide more accurate answers based on important information for the user."
+  },
   "callback": {
     "redirecting": "Redirecting..."
   },

@@ -118,9 +118,7 @@ export default function IndexPage() {
       <Header />
       <div className="w-full">
         <main className="max-w-7xl mx-auto space-y-8">
-          <h2 className="text-4xl font-serif text-center mb-4">
-            {getGreeting()}
-          </h2>
+          <h2 className="text-4xl text-center mb-4">{getGreeting()}</h2>
           <NewChatForm />
 
           <div className="max-w-2xl mx-auto w-full px-4 md:px-0">
