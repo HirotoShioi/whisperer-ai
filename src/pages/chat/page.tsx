@@ -1,30 +1,17 @@
-import { LoaderFunctionArgs, redirect, useLoaderData } from "react-router-dom";
-import { getThreadById } from "@/services/threads/service";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { DocumentPanel } from "./document-panel";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import type { Document, Thread } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
 import { useUsageQuery } from "@/services/usage/queries";
 import { useMessagesQuery } from "@/services/messages/queries";
 import { useDocumentsQuery } from "@/services/documents/queries";
 import { FullPageLoader } from "@/components/fulll-page-loader";
 import { useTranslation } from "react-i18next";
-
-export async function loader(params: LoaderFunctionArgs) {
-  const threadId = params.params.threadId;
-  if (!threadId) {
-    return { messages: [] };
-  }
-  const thread = await getThreadById(threadId);
-  if (!thread) {
-    return redirect(`/`);
-  }
-  return { thread };
-}
+import { useThreadQuery } from "@/services/threads/queries";
 
 const Document = React.memo(DocumentPanel);
 
@@ -70,18 +57,24 @@ function ChatPageContent() {
 }
 
 export default function ChatPage() {
-  const { thread } = useLoaderData() as { thread: Thread };
+  const params = useParams();
+  const navigate = useNavigate();
   const { t } = useTranslation();
+  const threadQuery = useThreadQuery(params.threadId!);
   const usageQuery = useUsageQuery();
-  const messagesQuery = useMessagesQuery(thread.id);
-  const documentQuery = useDocumentsQuery(thread.id);
+  const messagesQuery = useMessagesQuery(threadQuery.data?.id);
+  const documentQuery = useDocumentsQuery(threadQuery.data?.id);
   if (!usageQuery.data || !messagesQuery.data || !documentQuery.data) {
     return <FullPageLoader label={t("page.loading")} />;
+  }
+  if (threadQuery.data === null) {
+    navigate("/");
+    return null;
   }
 
   return (
     <ChatContextProvider
-      thread={thread}
+      thread={threadQuery.data!}
       messages={messagesQuery.data}
       documents={documentQuery.data}
       usage={usageQuery.data}

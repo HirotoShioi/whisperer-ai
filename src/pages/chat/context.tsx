@@ -58,8 +58,8 @@ export function ChatContextProvider({
   usage,
 }: ChatContextProviderProps) {
   const { t } = useTranslation();
-  const { mutateAsync: saveDocument } = useDocumentCreateMutation(thread.id);
-  const { mutateAsync: renameThread } = useRenameThreadMutation(thread.id);
+  const { mutateAsync: saveDocument } = useDocumentCreateMutation();
+  const { mutateAsync: renameThread } = useRenameThreadMutation();
   const { openAlert } = useAlert();
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const navigate = useNavigate();
@@ -83,7 +83,7 @@ export function ChatContextProvider({
       chatHook.append(parsedMessage);
       deleteFromLocalStorage(thread.id);
       nameConversation(parsedMessage.content).then((name) =>
-        renameThread(name)
+        renameThread({ threadId: thread.id, title: name })
       );
     }
   }, [thread.id, messages, chatHook, openAlert, navigate, renameThread]);

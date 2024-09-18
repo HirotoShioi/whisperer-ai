@@ -7,7 +7,7 @@ import ErrorPage from "@/pages/error-page";
 import Root from "@/routes/root";
 import Providers from "@/providers/providers";
 import NotFoundPage from "./pages/not-found-page";
-import ChatPage, { loader as chatLoader } from "./pages/chat/page";
+import ChatPage from "./pages/chat/page";
 import SettingsPage from "./pages/settings-page";
 import IndexPage from "./pages/index/page";
 import Callback, { loader as callbackLoader } from "./pages/callback";
@@ -39,7 +39,6 @@ const router = createBrowserRouter([
           {
             path: "/chat/:threadId",
             element: <ChatPage />,
-            loader: (arg) => chatLoader(arg),
           },
           {
             path: "/settings",
@@ -53,7 +52,7 @@ const router = createBrowserRouter([
           {
             path: "/callback",
             element: <Callback />,
-            loader: (arg) => callbackLoader(arg),
+            loader: callbackLoader,
           },
           { path: "*", element: <NotFoundPage /> },
         ],

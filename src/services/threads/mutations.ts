@@ -7,12 +7,15 @@ export const useCreateThreadMutation = () => {
   });
 };
 
-export const useRenameThreadMutation = (threadId: string) => {
+export const useRenameThreadMutation = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (title: string) => renameThread(threadId, title),
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["thread", { threadId }] });
+    mutationFn: ({ threadId, title }: { threadId: string; title: string }) =>
+      renameThread(threadId, title),
+    onSuccess: (data) => {
+      client.invalidateQueries({
+        queryKey: ["thread", { threadId: data.id }],
+      });
     },
   });
 };

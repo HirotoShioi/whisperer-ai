@@ -16,7 +16,7 @@ export function ChatInput() {
   const [rows, setRows] = useState(1);
   const { user } = useAuthenticator((context) => [context.user]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { mutateAsync: saveMessage } = useMessageCreateMutation(thread.id);
+  const { mutateAsync: saveMessage } = useMessageCreateMutation();
   useEffect(() => {
     if (textareaRef.current) {
       const lineHeight = 30;

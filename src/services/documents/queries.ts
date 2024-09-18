@@ -3,7 +3,7 @@ import { getDocumentsById } from "./service";
 import { Document } from "@/lib/database/schema";
 
 export const useDocumentsQuery = (
-  threadId: string,
+  threadId?: string,
   options: Omit<
     UseQueryOptions<Document[], Error, Document[]>,
     "queryKey" | "queryFn"
@@ -12,6 +12,7 @@ export const useDocumentsQuery = (
   return useQuery({
     ...options,
     queryKey: ["documents", { threadId }],
-    queryFn: () => getDocumentsById(threadId),
+    queryFn: () => getDocumentsById(threadId!),
+    enabled: !!threadId,
   });
 };

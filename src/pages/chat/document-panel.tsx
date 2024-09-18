@@ -189,7 +189,7 @@ export function DocumentPanel() {
     setPanelState,
     documents,
     isSmallScreen,
-    isUploadingDocuments: isUploadingContent,
+    isUploadingDocuments,
   } = useChatContext();
 
   const panelWidth = isSmallScreen
@@ -227,7 +227,7 @@ export function DocumentPanel() {
           <DocumentHeader document={selectedDocument} onClose={handleClose} />
           <div className="overflow-hidden">
             <div className="w-full overflow-y-auto h-full">
-              {isUploadingContent ? (
+              {isUploadingDocuments ? (
                 <DocumentListSkeleton />
               ) : selectedDocument ? (
                 <Documents document={selectedDocument} />

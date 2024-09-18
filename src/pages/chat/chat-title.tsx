@@ -27,16 +27,19 @@ function EditTitle({ thread }: ChatTitleProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(thread.title);
   const { revalidate } = useRevalidator();
-  const { mutate: renameThread } = useRenameThreadMutation(thread.id);
+  const { mutate: renameThread } = useRenameThreadMutation();
   const handleSaveTitle = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editedTitle.trim() === "") return;
-    renameThread(editedTitle, {
-      onSettled: () => {
-        setIsEditingTitle(false);
-        revalidate();
-      },
-    });
+    renameThread(
+      { threadId: thread.id, title: editedTitle },
+      {
+        onSettled: () => {
+          setIsEditingTitle(false);
+          revalidate();
+        },
+      }
+    );
   };
 
   return (

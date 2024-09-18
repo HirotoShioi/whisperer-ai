@@ -12,16 +12,16 @@ export const useDocumentDeleteMutation = () => {
   });
 };
 
-export const useDocumentCreateMutation = (threadId: string) => {
+export const useDocumentCreateMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: NewDocumentParams) => saveDocument(params),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["usage"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["documents", { threadId }],
+        queryKey: ["documents", { threadId: variables.threadId }],
       });
     },
   });
