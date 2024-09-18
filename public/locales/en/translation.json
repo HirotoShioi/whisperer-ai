@@ -6,7 +6,8 @@
     "delete": "Delete",
     "databaseDeleted": "Database deleted",
     "databaseDeletedDescription": "Your database has been deleted.",
-    "ok": "OK"
+    "ok": "OK",
+    "language": "Language"
   },
   "notFound": {
     "title": "404",

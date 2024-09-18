@@ -9,6 +9,7 @@ export async function getModel(options: ChatOpenAIFields) {
   return new ChatOpenAI(
     {
       ...options,
+      maxRetries: 0,
       apiKey: session.tokens.idToken.toString(),
     },
     {

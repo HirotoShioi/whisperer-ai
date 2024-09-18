@@ -62,6 +62,7 @@ async function handleChat(req: Request) {
       First, introduce yourself as a helpful assistant.
       Then, answer the user's question.
     `,
+    maxRetries: 0,
     messages: convertToCoreMessages(messages),
     tools: {
       getRelavantInformation: getRelavantInformationTool(threadId),

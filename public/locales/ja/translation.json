@@ -6,7 +6,8 @@
     "delete": "削除",
     "databaseDeleted": "データベースが削除されました",
     "databaseDeletedDescription": "データベースが削除されました。",
-    "ok": "OK"
+    "ok": "OK",
+    "language": "言語設定"
   },
   "notFound": {
     "title": "404",
