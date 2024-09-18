@@ -1,7 +1,6 @@
 import { XIcon, FileIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Document } from "@/lib/database/schema";
-import { useFetcher } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Markdown } from "@/components/markdown";
@@ -11,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { useTranslation } from "react-i18next";
+import { useDocumentDeleteMutation } from "@/services/documents/mutations";
+import { useToast } from "@/hooks/use-toast";
 
 function DocumentItem({
   document,
@@ -19,12 +20,26 @@ function DocumentItem({
   document: Document;
   onSelect: (document: Document) => void;
 }) {
-  const fetcher = useFetcher();
-
-  const handleDelete = (e: React.MouseEvent) => {
+  const deleteDocument = useDocumentDeleteMutation();
+  const { toast } = useToast();
+  async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
-  };
-
+    deleteDocument.mutate(document.id, {
+      onSuccess: () => {
+        toast({
+          title: "Document deleted",
+          variant: "success",
+          description: "The document has been successfully deleted.",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to delete document",
+          description: "Please try again.",
+        });
+      },
+    });
+  }
   return (
     <div
       className="flex items-center p-2 bg-white rounded-lg shadow-md border hover:bg-gray-50 transition cursor-pointer w-full"
@@ -36,17 +51,14 @@ function DocumentItem({
       <div className="flex-1 flex items-center overflow-hidden">
         <p className="text-sm font-medium truncate">{document.title}</p>
       </div>
-      <fetcher.Form method="DELETE" onClick={handleDelete}>
-        <input type="hidden" name="documentId" value={document.id} />
-        <Button
-          className="text-gray-400 hover:text-red-600 w-8 h-8 rounded-full hover:bg-gray-200"
-          size="icon"
-          type="submit"
-          variant="ghost"
-        >
-          <XIcon className="w-4 h-4" />
-        </Button>
-      </fetcher.Form>
+      <Button
+        className="text-gray-400 hover:text-red-600 w-8 h-8 rounded-full hover:bg-gray-200"
+        size="icon"
+        onClick={(e) => handleDelete(e)}
+        variant="ghost"
+      >
+        <XIcon className="w-4 h-4" />
+      </Button>
     </div>
   );
 }

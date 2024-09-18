@@ -8,7 +8,7 @@ const schema = z.object({
   title: z.string().describe("The title of the markdown file"),
 });
 
-export type MarkdownOutput = z.infer<typeof schema>;
+export type ConvertTextToMarkdownOutput = z.infer<typeof schema>;
 
 /**
  * Converts text to markdown.
@@ -18,7 +18,7 @@ export type MarkdownOutput = z.infer<typeof schema>;
  */
 export async function convertTextToMarkdown(
   text: string
-): Promise<MarkdownOutput> {
+): Promise<ConvertTextToMarkdownOutput> {
   if (text.length > MAXIMUM_TEXT_LENGTH_FOR_MARKDOWN_CONVERSION) {
     return {
       content: text,

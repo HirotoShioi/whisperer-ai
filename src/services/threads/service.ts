@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 export const newThreadId = () => {
   return nanoid();
 };
+
 export const createThread = async (
   newThreadId: string,
   title: string = "New Conversation"
@@ -30,11 +31,14 @@ export const renameThread = async (id: string, title: string) => {
 
 export const getThreadById = async (id: string) => {
   const db = await getDB();
-  const [thread] = await db
+  const result = await db
     .select()
     .from(schema.threads)
     .where(eq(schema.threads.id, id));
-  return thread;
+  if (result.length === 0) {
+    return null;
+  }
+  return result[0];
 };
 
 export const getThreads = async () => {
@@ -45,10 +49,6 @@ export const getThreads = async () => {
     .orderBy(desc(schema.threads.createdAt));
 };
 
-export const doesThreadExist = async (id: string) => {
-  const thread = await getThreadById(id);
-  return !!thread;
-};
 // deleteすると関連するmessages, resourcesも削除される
 export const deleteThread = async (id: string) => {
   const db = await getDB();

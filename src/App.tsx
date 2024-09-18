@@ -12,7 +12,7 @@ import ChatPage, {
   action as chatAction,
 } from "./pages/chat/page";
 import SettingsPage from "./pages/settings-page";
-import IndexPage, { loader as indexLoader } from "./pages/index/page";
+import IndexPage from "./pages/index/page";
 import Callback, { loader as callbackLoader } from "./pages/callback";
 import SignInPage from "./pages/sign-in";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -38,7 +38,6 @@ const router = createBrowserRouter([
             path: "/",
             index: true,
             element: <IndexPage />,
-            loader: indexLoader,
           },
           {
             path: "/chat/:threadId",

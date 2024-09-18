@@ -71,5 +71,14 @@
   },
   "database": {
     "loading": "Loading database..."
+  },
+  "page": {
+    "loading": "Loading messages and documents...",
+    "loadingThread": "Loading thread...",
+    "loadingData": "Loading data..."
+  },
+  "file": {
+    "fileSizeIsTooLarge": "File size is too large",
+    "pleaseUploadFilesSmallerThan5MB": "Please upload files smaller than 1MB"
   }
 }

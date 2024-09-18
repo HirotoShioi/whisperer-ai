@@ -11,12 +11,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ArrowLeft, Pencil } from "lucide-react";
-import { renameThread } from "@/services/threads";
-import { useNavigate, useRevalidator } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import Dropdown from "@/components/dropdown";
 import { useChatContext } from "./context";
 import { useTranslation } from "react-i18next";
+import { useRenameThreadMutation } from "@/services/threads/mutations";
 
 export interface ChatTitleProps {
   thread: Thread;
@@ -26,15 +26,15 @@ function EditTitle({ thread }: ChatTitleProps) {
   const { t } = useTranslation();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(thread.title);
-  const { revalidate } = useRevalidator();
-
+  const { mutate: renameThread } = useRenameThreadMutation(thread.id);
   const handleSaveTitle = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editedTitle.trim() === "") return;
-    await renameThread(thread.id, editedTitle).finally(() => {
-      setIsEditingTitle(false);
+    renameThread(editedTitle, {
+      onSettled: () => {
+        setIsEditingTitle(false);
+      },
     });
-    revalidate();
   };
 
   return (

@@ -2,24 +2,28 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Message } from "ai/react";
 import { useChat } from "@/hooks/use-chat";
 import { Document } from "@/lib/database/schema";
-import { useNavigate, useRevalidator } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAlert } from "@/components/alert";
 import {
   loadFromLocalStorage,
   deleteFromLocalStorage,
 } from "@/utils/local-storage";
-import { saveDocument } from "@/services/documents";
 import { nanoid } from "nanoid";
 import { parseFile } from "@/lib/file";
 import { useAutoScroll } from "@/hooks/use-auto-scroll";
 import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 import { MAXIMUM_FILE_SIZE_IN_BYTES, PREVIEW_TEXT_LENGTH } from "@/constants";
 import { Thread } from "@/lib/database/schema";
-import { renameThread } from "@/services/threads";
+import { useRenameThreadMutation } from "@/services/threads/mutations";
 import { nameConversation } from "@/lib/ai/name-conversation";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { Usage } from "@/services/usage";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useMessagesQuery } from "@/services/messages/queries";
+import { useDocumentsQuery } from "@/services/documents/queries";
+import { useDocumentCreateMutation } from "@/services/documents/mutations";
+import { FullPageLoader } from "@/components/fulll-page-loader";
+import { useTranslation } from "react-i18next";
 
 export type PanelState = "closed" | "list" | "detail";
 
@@ -44,12 +48,14 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatContextProvider: React.FC<{
   children: React.ReactNode;
-  initialMessages: Message[];
-  initialDocuments: Document[];
   usage: Usage;
   thread: Thread;
-}> = ({ children, initialMessages, initialDocuments, usage, thread }) => {
-  const { revalidate } = useRevalidator();
+}> = ({ children, usage, thread }) => {
+  const { t } = useTranslation();
+  const messagesQuery = useMessagesQuery(thread.id);
+  const documentQuery = useDocumentsQuery(thread.id);
+  const { mutateAsync: saveDocument } = useDocumentCreateMutation(thread.id);
+  const { mutateAsync: renameThread } = useRenameThreadMutation(thread.id);
   const { openAlert } = useAlert();
   const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const navigate = useNavigate();
@@ -57,7 +63,12 @@ export const ChatContextProvider: React.FC<{
   const [isDocumentUploaderOpen, setIsDocumentUploaderOpen] = useState(false);
   const { user } = useAuthenticator((c) => [c.user]);
   const { ref: scrollRef, scrollToEnd } = useAutoScroll();
-  const chatHook = useChat(thread.id, initialMessages);
+  const chatHook = useChat(
+    thread.id,
+    messagesQuery.data && messagesQuery.data.length > 0
+      ? messagesQuery.data
+      : []
+  );
   const [panelState, setPanelState] = useState<PanelState>(() => {
     if (window.innerWidth < 768) {
       return "closed";
@@ -65,26 +76,27 @@ export const ChatContextProvider: React.FC<{
     return "list";
   });
 
+  // ここもあとで修正する
   useEffect(() => {
     const message = loadFromLocalStorage(thread.id);
-    if (message && initialMessages.length <= 0) {
+    if (message && messagesQuery.data && messagesQuery.data.length <= 0) {
       const parsedMessage = JSON.parse(message);
       chatHook.append(parsedMessage);
       deleteFromLocalStorage(thread.id);
-      // non-blocking
-      nameConversation(parsedMessage.content)
-        .then((name) => renameThread(thread.id, name))
-        .then(() => revalidate());
+      nameConversation(parsedMessage.content).then((name) =>
+        renameThread(name)
+      );
     }
   }, [
     thread.id,
-    initialMessages.length,
+    messagesQuery.data,
     chatHook,
     openAlert,
     navigate,
-    revalidate,
+    renameThread,
   ]);
 
+  // ここもあとで修正する
   async function uploadFiles(acceptedFiles: File[]) {
     if (!user) {
       return;
@@ -96,8 +108,8 @@ export const ChatContextProvider: React.FC<{
     }
     if (acceptedFiles.some((file) => file.size >= MAXIMUM_FILE_SIZE_IN_BYTES)) {
       openAlert({
-        title: "File size is too large",
-        description: "Please upload files smaller than 5MB",
+        title: t("file.fileSizeIsTooLarge"),
+        description: t("file.pleaseUploadFilesSmallerThan1MB"),
         actions: [
           {
             label: "OK",
@@ -110,12 +122,27 @@ export const ChatContextProvider: React.FC<{
       const fileWithText = await Promise.all(
         acceptedFiles.map(async (file) => {
           const { content, fileType } = await parseFile(file, file.type);
-          await saveDocument({
-            threadId: thread.id,
-            content,
-            title: file.name,
-            fileType,
-          });
+          await saveDocument(
+            {
+              threadId: thread.id,
+              content,
+              title: file.name,
+              fileType,
+            },
+            {
+              onError: (error) => {
+                openAlert({
+                  title: "Error",
+                  description: error.message,
+                  actions: [
+                    {
+                      label: "OK",
+                    },
+                  ],
+                });
+              },
+            }
+          );
           return {
             text: content,
             file,
@@ -145,7 +172,6 @@ export const ChatContextProvider: React.FC<{
       };
       chatHook.append(message);
       setPanelState("list");
-      revalidate();
       scrollToEnd();
     } finally {
       setIsUploadingDocuments(false);
@@ -169,6 +195,10 @@ export const ChatContextProvider: React.FC<{
     }
   };
 
+  if (messagesQuery.isLoading || documentQuery.isLoading) {
+    // あとでskeletonを入れる
+    return <FullPageLoader label={t("page.loading")} />;
+  }
   return (
     <ChatContext.Provider
       value={{
@@ -176,7 +206,7 @@ export const ChatContextProvider: React.FC<{
         panelState,
         setPanelState,
         isSmallScreen,
-        documents: initialDocuments,
+        documents: documentQuery.data || [],
         uploadFiles,
         uploadText,
         scrollRef,

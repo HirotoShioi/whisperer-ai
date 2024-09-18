@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useChatContext } from "@/pages/chat/context";
 import { UsageTooltip } from "@/components/usage-tooltip";
-import { saveMessage } from "@/services/messages";
+
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useTranslation } from "react-i18next";
+import { useMessageCreateMutation } from "@/services/messages/mutations";
 
 export function ChatInput() {
   const { chatHook, usage, thread, scrollToEnd, setIsDocumentUploaderOpen } =
@@ -15,7 +16,7 @@ export function ChatInput() {
   const [rows, setRows] = useState(1);
   const { user } = useAuthenticator((context) => [context.user]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const { mutateAsync: saveMessage } = useMessageCreateMutation(thread.id);
   useEffect(() => {
     if (textareaRef.current) {
       const lineHeight = 30;

@@ -71,5 +71,14 @@
   },
   "database": {
     "loading": "データベースを読み込み中..."
+  },
+  "page": {
+    "loading": "メッセージとドキュメントを読み込み中...",
+    "loadingThread": "スレッドを読み込み中...",
+    "loadingData": "データを読み込み中..."
+  },
+  "file": {
+    "fileSizeIsTooLarge": "ファイルサイズが大きすぎます",
+    "pleaseUploadFilesSmallerThan5MB": "ファイルサイズは5MB以下にしてください"
   }
 }

@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PenSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createThread, getThreads, newThreadId } from "@/services/threads";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { newThreadId } from "@/services/threads/service";
+import { useCreateThreadMutation } from "@/services/threads/mutations";
+import { useNavigate } from "react-router-dom";
 import { Thread } from "@/lib/database/schema";
 import { Link } from "react-router-dom";
 import { saveToLocalStorage } from "@/utils/local-storage";
@@ -10,20 +11,13 @@ import { useRef } from "react";
 import Header from "@/components/header";
 import { BASE_CHAT_MODEL } from "@/constants";
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { getUsage, Usage } from "@/services/usage";
+
 import { UsageTooltip } from "@/components/usage-tooltip";
 import { useTranslation } from "react-i18next";
-
-export async function loader() {
-  const [threads, usage] = await Promise.all([
-    getThreads().catch(() => []),
-    getUsage(),
-  ]);
-  return {
-    threads,
-    usage,
-  };
-}
+import { useUsageQuery } from "@/services/usage/queries";
+import { Usage } from "@/services/usage";
+import { FullPageLoader } from "@/components/fulll-page-loader";
+import { useThreadsQuery } from "@/services/threads/queries";
 
 function ThreadItem({ thread }: { thread: Thread }) {
   return (
@@ -40,9 +34,9 @@ function ThreadItem({ thread }: { thread: Thread }) {
   );
 }
 
-function NewChatForm() {
+function NewChatForm({ usage }: { usage: Usage }) {
+  const { mutateAsync: createThread } = useCreateThreadMutation();
   const navigate = useNavigate();
-  const { usage } = useLoaderData() as { usage: Usage };
   const newId = newThreadId();
   const input = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
@@ -101,7 +95,8 @@ function NewChatForm() {
 
 export default function IndexPage() {
   const { t } = useTranslation();
-  const { threads } = useLoaderData() as { threads: Thread[] };
+  const threads = useThreadsQuery();
+  const usage = useUsageQuery();
   function getGreeting(): string {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
@@ -113,13 +108,17 @@ export default function IndexPage() {
     }
   }
 
+  if (!usage.data || usage.isLoading || !threads.data) {
+    return <FullPageLoader label={t("page.loadingData")} />;
+  }
+
   return (
     <>
       <Header />
       <div className="w-full">
         <main className="max-w-7xl mx-auto space-y-8">
           <h2 className="text-4xl text-center mb-4">{getGreeting()}</h2>
-          <NewChatForm />
+          <NewChatForm usage={usage.data} />
 
           <div className="max-w-2xl mx-auto w-full px-4 md:px-0">
             <div className="flex justify-between items-center">
@@ -132,7 +131,7 @@ export default function IndexPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {threads.map((thread, index) => (
+              {threads.data.map((thread, index) => (
                 <ThreadItem key={index} thread={thread} />
               ))}
             </div>

@@ -1,22 +1,24 @@
-import { Message } from "ai/react";
-import { getMessages } from "@/services/messages";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   redirect,
   useLoaderData,
+  useParams,
 } from "react-router-dom";
-import { doesThreadExist, getThreadById } from "@/services/threads";
+import { getThreadById } from "@/services/threads/service";
 import { useEffect } from "react";
-import { deleteDocumentById, getDocumentsById } from "@/services/documents";
+import { deleteDocumentById } from "@/services/documents/service";
 import { MessageComponent } from "./message";
 import { ChatInput } from "./chat-input";
 import { DocumentPanel } from "./document-panel";
 import { ChatContextProvider, useChatContext } from "@/pages/chat/context";
 import React from "react";
-import type { Thread, Document } from "@/lib/database/schema";
+import type { Document } from "@/lib/database/schema";
 import { ChatTitle } from "./chat-title";
 import { getUsage, Usage } from "@/services/usage";
+import { useThreadQuery } from "@/services/threads/queries";
+import { FullPageLoader } from "@/components/fulll-page-loader";
+import { useTranslation } from "react-i18next";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -39,17 +41,14 @@ export async function loader(params: LoaderFunctionArgs) {
   if (!threadId) {
     return { messages: [] };
   }
-  const exists = await doesThreadExist(threadId);
-  if (!exists) {
-    return redirect(`/`);
-  }
-  const [messages, documents, thread, usage] = await Promise.all([
-    getMessages(threadId),
-    getDocumentsById(threadId),
+  const [thread, usage] = await Promise.all([
     getThreadById(threadId),
     getUsage(),
   ]);
-  return { messages, documents, thread, usage };
+  if (!thread) {
+    return redirect(`/`);
+  }
+  return { thread, usage };
 }
 
 const Document = React.memo(DocumentPanel);
@@ -96,25 +95,17 @@ function ChatPageContent() {
 }
 
 export default function ChatPage() {
-  const {
-    messages: initialMessages,
-    documents: initialDocuments,
-    thread,
-    usage,
-  } = useLoaderData() as {
-    messages: Message[];
-    documents: Document[];
-    thread: Thread;
+  const { usage } = useLoaderData() as {
     usage: Usage;
   };
-
+  const params = useParams();
+  const { t } = useTranslation();
+  const { data: thread, isLoading } = useThreadQuery(params.threadId!);
+  if (isLoading || !thread) {
+    return <FullPageLoader label={t("page.loadingThread")} />;
+  }
   return (
-    <ChatContextProvider
-      usage={usage}
-      initialMessages={initialMessages}
-      initialDocuments={initialDocuments}
-      thread={thread}
-    >
+    <ChatContextProvider usage={usage} thread={thread}>
       <ChatPageContent />
     </ChatContextProvider>
   );
