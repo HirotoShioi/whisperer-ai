@@ -15,19 +15,113 @@ import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatContext } from "@/pages/chat/context";
 import { UsageTooltip } from "@/components/usage-tooltip";
-import { cn } from "@/lib/utils";
+import { cn, nanoid } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { MAXIMUM_FILE_SIZE_IN_BYTES } from "@/constants";
+import { useAlert } from "@/components/alert";
+import { parseFile } from "@/lib/file";
+import { useDocumentCreateMutation } from "@/services/documents/mutations";
+import { PREVIEW_TEXT_LENGTH } from "@/constants";
+import { Message } from "ai/react";
+import { convertTextToMarkdown } from "@/lib/ai/convert-text-to-markdown";
 
 export default function DocumentUploader() {
   const {
-    uploadFiles,
-    uploadText,
     isDocumentUploaderOpen,
     setIsDocumentUploaderOpen,
     usage,
+    thread,
+    setPanelState,
+    chatHook,
+    scrollToEnd,
+    setIsUploadingDocuments,
   } = useChatContext();
   const { t } = useTranslation();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { user } = useAuthenticator((u) => [u.user]);
+  const { openAlert } = useAlert();
+  const { mutateAsync: saveDocument } = useDocumentCreateMutation();
+  async function uploadFiles(acceptedFiles: File[]) {
+    if (!user) {
+      return;
+    }
+    setIsUploadingDocuments(true);
+    setIsDocumentUploaderOpen(false);
+    if (acceptedFiles.length <= 0) {
+      return;
+    }
+    if (acceptedFiles.some((file) => file.size >= MAXIMUM_FILE_SIZE_IN_BYTES)) {
+      openAlert({
+        title: t("file.fileSizeIsTooLarge"),
+        description: t("file.pleaseUploadFilesSmallerThan1MB"),
+        actions: [
+          {
+            label: "OK",
+          },
+        ],
+      });
+      return;
+    }
+    try {
+      const fileWithText = await Promise.all(
+        acceptedFiles.map(async (file) => {
+          const { content, fileType } = await parseFile(file, file.type);
+          await saveDocument(
+            {
+              threadId: thread.id,
+              content,
+              title: file.name,
+              fileType,
+            },
+            {
+              onError: (error) => {
+                openAlert({
+                  title: "Error",
+                  description: error.message,
+                  actions: [
+                    {
+                      label: "OK",
+                    },
+                  ],
+                });
+              },
+            }
+          );
+          return {
+            text: content,
+            file,
+          };
+        })
+      );
+      const message: Message = {
+        id: nanoid(),
+        role: "assistant" as const,
+        content: "",
+        toolInvocations: fileWithText.map(({ text, file }) => ({
+          state: "result" as const,
+          toolCallId: nanoid(),
+          toolName: "saveDocument",
+          args: {},
+          result: {
+            success: true,
+            fileId: nanoid(),
+            file: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+            },
+            preview: text.slice(0, PREVIEW_TEXT_LENGTH).trim(),
+          },
+        })),
+      };
+      chatHook.append(message);
+      setPanelState("list");
+      scrollToEnd();
+    } finally {
+      setIsUploadingDocuments(false);
+    }
+  }
 
   const onDrop = async (acceptedFiles: File[]) => {
     await uploadFiles(acceptedFiles);
@@ -44,9 +138,20 @@ export default function DocumentUploader() {
     },
   });
 
-  const handleSubmit = async () => {
-    if (textAreaRef.current?.value) {
-      await uploadText(textAreaRef.current.value);
+  const uploadText = async () => {
+    if (!user || usage.isZero || !textAreaRef.current?.value) {
+      return;
+    }
+    setIsUploadingDocuments(true);
+    setIsDocumentUploaderOpen(false);
+    try {
+      const markdown = await convertTextToMarkdown(textAreaRef.current.value);
+      const file = new File([markdown.content], markdown.title, {
+        type: "text/markdown",
+      });
+      await uploadFiles([file]);
+    } finally {
+      setIsUploadingDocuments(false);
     }
   };
 
@@ -96,7 +201,7 @@ export default function DocumentUploader() {
         </div>
         <DialogFooter className="flex justify-end">
           <UsageTooltip usage={usage}>
-            <Button onClick={handleSubmit} disabled={usage.isZero}>
+            <Button onClick={uploadText} disabled={usage.isZero}>
               {t("documentUploader.add")}
             </Button>
           </UsageTooltip>
